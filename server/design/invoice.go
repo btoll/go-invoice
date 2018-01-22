@@ -1,0 +1,121 @@
+package design
+
+import (
+	. "github.com/goadesign/goa/design"
+	. "github.com/goadesign/goa/design/apidsl"
+)
+
+var _ = Resource("Invoice", func() {
+	BasePath("/invoice")
+	Description("Describes an invoice.")
+
+	Action("create", func() {
+		Routing(POST("/"))
+		Description("Create a new invoice.")
+		Payload(InvoicePayload)
+		Response(OK, InvoiceMedia)
+	})
+
+	Action("show", func() {
+		Routing(GET("/:id"))
+		Params(func() {
+			Param("id", String, "Invoice ID")
+		})
+		Description("Get an invoice by id.")
+		Response(OK, InvoiceMedia)
+	})
+
+	Action("update", func() {
+		Routing(PUT("/:id"))
+		Payload(InvoicePayload)
+		Params(func() {
+			Param("id", String, "Invoice ID")
+		})
+		Description("Update an invoice by id.")
+		Response(OK, func() {
+			Status(200)
+			Media(InvoiceMedia, "tiny")
+		})
+	})
+
+	Action("delete", func() {
+		Routing(DELETE("/:id"))
+		Params(func() {
+			Param("id", Integer, "Invoice ID")
+		})
+		Description("Delete an invoice by id.")
+		Response(OK, func() {
+			Status(200)
+			Media(InvoiceMedia, "tiny")
+		})
+	})
+
+	Action("list", func() {
+		Routing(GET("/list"))
+		Description("Get all invoices")
+		Response(OK, CollectionOf(InvoiceMedia))
+	})
+})
+
+var InvoicePayload = Type("InvoicePayload", func() {
+	Description("Invoice Description.")
+
+	Attribute("id", Integer, "ID", func() {
+		Metadata("struct:tag:datastore", "id,noindex")
+		Metadata("struct:tag:json", "id,omitempty")
+	})
+	Attribute("date", String, "Invoice date", func() {
+		Metadata("struct:tag:datastore", "date,noindex")
+		Metadata("struct:tag:json", "date,omitempty")
+	})
+	Attribute("hours", Number, "Invoice hours", func() {
+		Metadata("struct:tag:datastore", "hours,noindex")
+		Metadata("struct:tag:json", "hours,omitempty")
+	})
+	Attribute("title", String, "Invoice title", func() {
+		Metadata("struct:tag:datastore", "title,noindex")
+		Metadata("struct:tag:json", "title,omitempty")
+	})
+	Attribute("comment", String, "Invoice comment", func() {
+		Metadata("struct:tag:datastore", "comment,noindex")
+		Metadata("struct:tag:json", "comment,omitempty")
+	})
+	Attribute("url", String, "Invoice url", func() {
+		Metadata("struct:tag:datastore", "url,noindex")
+		Metadata("struct:tag:json", "url,omitempty")
+	})
+
+	Required("date", "hours", "title", "comment", "url")
+})
+
+var InvoiceMedia = MediaType("application/invoiceapi.invoiceentity", func() {
+	Description("Invoice response")
+	TypeName("InvoiceMedia")
+	ContentType("application/json")
+	Reference(InvoicePayload)
+
+	Attributes(func() {
+		Attribute("id")
+		Attribute("date")
+		Attribute("hours")
+		Attribute("title")
+		Attribute("comment")
+		Attribute("url")
+
+		Required("id", "date", "hours", "title", "comment", "url")
+	})
+
+	View("default", func() {
+		Attribute("id")
+		Attribute("date")
+		Attribute("hours")
+		Attribute("title")
+		Attribute("comment")
+		Attribute("url")
+	})
+
+	View("tiny", func() {
+		Description("`tiny` is the view used to create new invoices.")
+		Attribute("id")
+	})
+})

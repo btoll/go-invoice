@@ -1,0 +1,19 @@
+client/elm-stuff
+client/elm.js
+
+# Let's not version all the dependencies!
+server/vendor
+
+# Goa v1 generated code...
+server/app
+server/client
+server/swagger
+server/tool
+
+# For Makefile.
+server/.__gen__
+exclude-from.txt
+
+# The binary build artifact.
+server/go-invoice
+
