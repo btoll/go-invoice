@@ -1,12 +1,28 @@
-module Util.Form exposing (checkboxRow, datePickerRow, disabledTextRow, hiddenTextRow, passwordRow, selectRow, floatRow, submitRow, textAreaRow, textRow)
+module Util.Form exposing (
+    checkboxRow
+    , customColumn
+    , datePickerRow
+    , disabledTextRow
+    , hiddenTextRow
+    , passwordRow
+    , selectRow
+    , floatRow
+    , submitRow
+    , tableButton
+    , textAreaRow
+    , textRow
+    , toRowAttrs
+    )
 
+import Data.Invoice exposing (Invoice)
 import Date exposing (Date)
 import DateTimePicker
 import DateTimePicker.Config exposing (Config, DatePickerConfig, TimePickerConfig, defaultDateTimePickerConfig)
 import Dict exposing (Dict)
-import Html exposing (Html, div, input, label, option, select, text, textarea)
-import Html.Attributes exposing (checked, class, disabled, for, hidden, id, selected, step, type_, value)
+import Html exposing (Html, Attribute, button, div, input, label, option, select, text, textarea)
+import Html.Attributes exposing (checked, class, disabled, for, hidden, id, selected, step, style, type_, value)
 import Html.Events exposing (onCheck, onClick, onInput)
+import Table exposing (defaultCustomizations)
 
 
 
@@ -118,6 +134,35 @@ textRow name val fn =
     div [] [
         label [ prepareId name |> for ] [ text name ]
         , input [ disabled False, prepareId name |> id, onInput fn, type_ "text", value val ] []
+    ]
+
+
+
+-----------------------------------------------------------------------------
+-- Table package helpers
+-- http://package.elm-lang.org/packages/evancz/elm-sortable-table/1.0.1/Table
+-----------------------------------------------------------------------------
+
+
+customColumn : ( Invoice -> Table.HtmlDetails msg ) -> Table.Column Invoice msg
+customColumn viewElement =
+    Table.veryCustomColumn
+        { name = ""
+        , viewData = viewElement
+        , sorter = Table.unsortable
+        }
+
+
+tableButton : ( Invoice -> msg ) -> Invoice -> Table.HtmlDetails msg
+tableButton msg invoice =
+    Table.HtmlDetails []
+        [ button [ onClick <| msg <| invoice ] [ text ( toString msg ) ]
+        ]
+
+
+toRowAttrs : Invoice -> List ( Attribute msg )
+toRowAttrs { id } =
+    [ style [ ( "background", "white" ) ]
     ]
 
 

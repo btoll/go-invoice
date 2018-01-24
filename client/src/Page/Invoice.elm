@@ -326,33 +326,11 @@ config =
         , Table.stringColumn "URL" .url
         , Table.stringColumn "Comment" .comment
         , Table.floatColumn "Hours" .hours
-        , customColumn ( viewButton Edit )
-        , customColumn ( viewButton Delete )
+        , Form.customColumn ( Form.tableButton Edit )
+        , Form.customColumn ( Form.tableButton Delete )
         ]
     , customizations =
-        { defaultCustomizations | rowAttrs = toRowAttrs }
+        { defaultCustomizations | rowAttrs = Form.toRowAttrs }
     }
-
-
-toRowAttrs : Invoice -> List ( Attribute Msg )
-toRowAttrs { id } =
-    [ style [ ( "background", "white" ) ]
-    ]
-
-
-customColumn : ( Invoice -> Table.HtmlDetails Msg ) -> Table.Column Invoice Msg
-customColumn viewElement =
-    Table.veryCustomColumn
-        { name = ""
-        , viewData = viewElement
-        , sorter = Table.unsortable
-        }
-
-
-viewButton : ( Invoice -> Msg ) -> Invoice -> Table.HtmlDetails Msg
-viewButton msg invoice =
-    Table.HtmlDetails []
-        [ button [ onClick <| msg <| invoice ] [ text ( toString msg ) ]
-        ]
 
 
