@@ -81,7 +81,7 @@ form > div label {
     text-align: right;
     width: 130px;
 }
-form div.elm-input-datepickerDatePicker {
+form div.elm-datepicker--container {
     display: inline-block;
 }
 /* The last child contains the form buttons. */

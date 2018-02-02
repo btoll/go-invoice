@@ -4,12 +4,11 @@ DROP TABLE IF EXISTS `invoice` ;
 
 CREATE TABLE IF NOT EXISTS `invoice` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `dateFrom` date NOT NULL,
-  `dateTo` date NOT NULL,
-  `title` varchar(255) DEFAULT NULL,
+  `date` date NOT NULL,
+  `title` varchar(255) NOT NULL,
   `url` varchar(255) DEFAULT NULL,
   `comment` text DEFAULT NULL,
-  `totalHours` decimal(3,2) DEFAULT 0.00,
+  `hours` decimal(2,2) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `ID` (`id`)
 ) ;

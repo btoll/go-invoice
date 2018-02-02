@@ -1,15 +1,8 @@
 module Page.Invoice exposing (Model, Msg, init, update, view)
 
-import Css
-import Data.Invoice exposing (Invoice)
-import Date exposing (Date)
-import Date.Extra.Config.Config_en_us exposing (config)
-import Date.Extra.Format
-import DateParser
-import DateTimePicker
-import DateTimePicker.Config exposing (Config, DatePickerConfig, defaultDatePickerConfig)
-import DateTimePicker.Css
-import Dict exposing (Dict)
+import Data.Invoice exposing (Invoice, new)
+import Date exposing (Date, Day(..), day, dayOfWeek, month, year)
+import DatePicker exposing (defaultSettings, DateEvent(..))
 import Html exposing (Html, Attribute, button, div, form, h1, input, label, node, section, text)
 import Html.Attributes exposing (action, checked, disabled, for, id, style, type_, value)
 import Html.Events exposing (onClick, onInput, onSubmit)
@@ -18,7 +11,8 @@ import Http
 import Request.Invoice
 import Table exposing (defaultCustomizations)
 import Task exposing (Task)
-import Util.Form as Form
+import Util.Date
+import Views.Form as Form
 
 
 
@@ -26,30 +20,90 @@ import Util.Form as Form
 
 
 type alias Model =
-    -- NOTE: Order matters here (see `init`)!
     { tableState : Table.State
     , action : Action
     , editing : Maybe Invoice
     , disabled : Bool
-    , date : Dict String Date -- The key is actually a DemoPicker
-    , datePickerState : Dict String DateTimePicker.State -- The key is actually a DemoPicker
     , invoices : List Invoice
+
+    , startDate : Maybe Date
+    , endDate : Maybe Date
+    , startDatePicker : DatePicker.DatePicker
+    , endDatePicker : DatePicker.DatePicker
     }
-
-
-type DemoPicker
-    = DateTimePicker
 
 
 type Action = None | Adding | Editing
 
 
+commonSettings : DatePicker.Settings
+commonSettings =
+    defaultSettings
+
+
+startSettings : Maybe Date -> DatePicker.Settings
+startSettings endDate =
+    let
+        isDisabled =
+            case endDate of
+                Nothing ->
+                    commonSettings.isDisabled
+
+                Just endDate ->
+                    \d ->
+                        Date.toTime d
+                            > Date.toTime endDate
+                            || (commonSettings.isDisabled d)
+    in
+        { commonSettings
+            | placeholder = ""
+            , isDisabled = isDisabled
+        }
+
+
+endSettings : Maybe Date -> DatePicker.Settings
+endSettings startDate =
+    let
+        isDisabled =
+            case startDate of
+                Nothing ->
+                    commonSettings.isDisabled
+
+                Just startDate ->
+                    \d ->
+                        Date.toTime d
+                            < Date.toTime startDate
+                            || (commonSettings.isDisabled d)
+    in
+        { commonSettings
+            | placeholder = ""
+            , isDisabled = isDisabled
+        }
+
+
 init : String -> ( Model, Cmd Msg )
 init url =
-    ( Model ( Table.initialSort "ID" ) None Nothing True Dict.empty Dict.empty [] ) !
-        [ Request.Invoice.get url |> Http.send Getted
-        , DateTimePicker.initialCmd DatePickerChanged DateTimePicker.initialState
-        ]
+    let
+        ( startDatePicker, startDatePickerFx ) =
+            DatePicker.init
+
+        ( endDatePicker, endDatePickerFx ) =
+            DatePicker.init
+    in
+        { tableState = Table.initialSort "ID"
+        , action = None
+        , editing = Nothing
+        , disabled = True
+        , invoices = []
+
+        , startDate = Nothing
+        , endDate = Nothing
+        , startDatePicker = startDatePicker
+        , endDatePicker = endDatePicker
+        } ! [ Cmd.map DatePickerStart startDatePickerFx
+            , Cmd.map DatePickerEnd endDatePickerFx
+            , Request.Invoice.get url |> Http.send Getted
+            ]
 
 
 -- UPDATE
@@ -58,7 +112,8 @@ init url =
 type Msg
     = Add
     | Cancel
-    | DatePickerChanged DateTimePicker.State ( Maybe Date )
+    | DatePickerEnd DatePicker.Msg
+    | DatePickerStart DatePicker.Msg
     | Delete Invoice
     | Deleted ( Result Http.Error Invoice )
     | Edit Invoice
@@ -87,27 +142,77 @@ update url msg model =
                 , editing = Nothing
             } ! []
 
-        DatePickerChanged state value ->
+        DatePickerEnd subMsg ->
             let
-                editable : Invoice
-                editable = case model.editing of
-                    Nothing ->
-                        Invoice -1 "" "" "" "" 0.00
+                ( newDatePicker, datePickerFx, dateEvent ) =
+                    DatePicker.update (endSettings model.startDate) subMsg model.endDatePicker
 
-                    Just invoice ->
-                        invoice
+                ( newDate, newInvoice ) =
+                    let
+                        invoice = Maybe.withDefault new model.editing
+                    in
+                    case dateEvent of
+                        Changed newDate ->
+                            let
+                                dateString =
+                                    case dateEvent of
+                                        Changed date ->
+                                            case date of
+                                                Nothing ->
+                                                    ""
+
+                                                Just d ->
+                                                    d |> Util.Date.simple
+
+                                        _ ->
+                                            invoice.dateTo
+                            in
+                            ( newDate , { invoice | dateTo = dateString } )
+
+                        _ ->
+                            ( model.endDate, { invoice | dateTo = invoice.dateTo } )
             in
-                { model
-                    | date =
-                        case value of
-                            Nothing ->
-                                Dict.remove ( toString DateTimePicker ) model.date
+            { model
+                | endDate = newDate
+                , endDatePicker = newDatePicker
+                , editing = Just newInvoice
+            } ! [ Cmd.map DatePickerEnd datePickerFx ]
 
-                            Just date ->
-                                Dict.insert ( toString DateTimePicker ) date model.date
-                    , datePickerState = Dict.insert ( toString DateTimePicker ) state model.datePickerState
-                    , editing = Just ( { editable | date = value |> toString } )
-                } ! []
+        DatePickerStart subMsg ->
+            let
+                ( newDatePicker, datePickerFx, dateEvent ) =
+                    DatePicker.update (startSettings model.startDate) subMsg model.startDatePicker
+
+                ( newDate, newInvoice ) =
+                    let
+                        invoice = Maybe.withDefault new model.editing
+                    in
+                    case dateEvent of
+                        Changed newDate ->
+                            let
+                                dateString =
+                                    case dateEvent of
+                                        Changed date ->
+                                            case date of
+                                                Nothing ->
+                                                    ""
+
+                                                Just d ->
+                                                    d |> Util.Date.simple
+
+                                        _ ->
+                                            invoice.dateFrom
+                            in
+                            ( newDate , { invoice | dateFrom = dateString } )
+
+                        _ ->
+                            ( model.endDate, { invoice | dateFrom = invoice.dateFrom } )
+            in
+            { model
+                | startDate = newDate
+                , startDatePicker = newDatePicker
+                , editing = Just newInvoice
+            } ! [ Cmd.map DatePickerStart datePickerFx ]
 
         Delete invoice ->
             let
@@ -116,10 +221,10 @@ update url msg model =
                         |> Http.toTask
                         |> Task.attempt Deleted
             in
-                { model |
-                    action = None
-                    , editing = Nothing
-                } ! [ subCmd ]
+            { model |
+                action = None
+                , editing = Nothing
+            } ! [ subCmd ]
 
         Deleted ( Ok deletedInvoice ) ->
             { model |
@@ -158,9 +263,9 @@ update url msg model =
                             |> Http.toTask
                             |> Task.attempt Posted
             in
-                { model |
-                    action = None
-                } ! [ subCmd ]
+            { model |
+                action = None
+            } ! [ subCmd ]
 
         Posted ( Ok invoice ) ->
             let
@@ -173,10 +278,10 @@ update url msg model =
                             model.invoices
                                 |> (::) { newInvoice | id = invoice.id }
             in
-                { model |
-                    invoices = invoices
-                    , editing = Nothing
-                } ! []
+            { model |
+                invoices = invoices
+                , editing = Nothing
+            } ! []
 
         Posted ( Err err ) ->
             { model |
@@ -194,9 +299,9 @@ update url msg model =
                             |> Http.toTask
                             |> Task.attempt Putted
             in
-                { model |
-                    action = None
-                } ! [ subCmd ]
+            { model |
+                action = None
+            } ! [ subCmd ]
 
         Putted ( Ok id ) ->
             let
@@ -212,18 +317,18 @@ update url msg model =
                     case model.editing of
                         -- TODO
                         Nothing ->
-                            Invoice -1 "" "" "" "" 0.00
+                            new
 
                         Just invoice ->
                             invoice
             in
-                { model |
-                    invoices =
-                        model.invoices
-                            |> List.filter ( \m -> newInvoice.id /= m.id )
-                            |> (::) newInvoice
-                    , editing = Nothing
-                } ! []
+            { model |
+                invoices =
+                    model.invoices
+                        |> List.filter ( \m -> newInvoice.id /= m.id )
+                        |> (::) newInvoice
+                , editing = Nothing
+            } ! []
 
         Putted ( Err err ) ->
             { model |
@@ -252,11 +357,6 @@ update url msg model =
 -- VIEW
 
 
-datePickerConfig : Config ( DatePickerConfig { } ) Msg
-datePickerConfig =
-    defaultDatePickerConfig DatePickerChanged
-
-
 view : Model -> Html Msg
 view model =
     section []
@@ -267,48 +367,68 @@ view model =
 
 
 drawView : Model -> List ( Html Msg )
-drawView ( { action, disabled, editing, tableState, invoices } as model ) =
+drawView model =
     let
         editable : Invoice
-        editable = case editing of
+        editable = case model.editing of
             Nothing ->
-                Invoice -1 "" "" "" "" 0.00
+                new
 
             Just invoice ->
                 invoice
-
-        { css } =
-            Css.compile [ DateTimePicker.Css.css ]
     in
-        case action of
+        case model.action of
             None ->
                 [ button [ onClick Add ] [ text "Add Invoice" ]
-                , Table.view config tableState invoices
+                , Table.view config model.tableState model.invoices
                 ]
 
             Adding ->
-                [ form [ onSubmit Post ] [
-                    node "style" [] [ text css ]
-                    , Form.datePickerRow "Date" "DateTimePicker" model datePickerConfig
-                    , Form.textRow "Title" editable.title ( SetFormValue (\v -> { editable | title = v }) )
-                    , Form.textRow "URL" editable.url ( SetFormValue (\v -> { editable | url = v }) )
-                    , Form.textAreaRow "Comment" editable.comment ( SetFormValue (\v -> { editable | comment = v }) )
-                    , Form.floatRow "Hours" ( toString editable.hours ) ( SetFormValue (\v -> { editable | hours = ( Result.withDefault 0.00 ( String.toFloat v ) ) } ) )
-                    , Form.submitRow disabled Cancel
-                    ]
+                [ form [ onSubmit Post ]
+                    ( formFields model editable )
                 ]
 
             Editing ->
-                [ form [ onSubmit Put ] [
-                    node "style" [] [ text css ]
-                    , Form.datePickerRow "Date" "DateTimePicker" model datePickerConfig
-                    , Form.textRow "Title" editable.title ( SetFormValue (\v -> { editable | title = v }) )
-                    , Form.textRow "URL" editable.url ( SetFormValue (\v -> { editable | url = v }) )
-                    , Form.textAreaRow "Comment" editable.comment ( SetFormValue (\v -> { editable | comment = v }) )
-                    , Form.floatRow "Hours" ( toString editable.hours ) ( SetFormValue (\v -> { editable | hours = ( Result.withDefault 0.00 ( String.toFloat v ) ) } ) )
-                    , Form.submitRow disabled Cancel
-                    ]
+                [ form [ onSubmit Put ]
+                    ( formFields model editable )
                 ]
+
+
+formFields : Model -> Invoice -> List ( Html Msg )
+formFields model invoice =
+    [ div [] [
+        label [] [ text "Date From" ]
+        , DatePicker.view model.startDate ( startSettings model.endDate ) model.startDatePicker
+            |> Html.map DatePickerStart
+    ]
+    , div [] [
+        label [] [ text "Date To" ]
+        , DatePicker.view model.endDate ( endSettings model.startDate ) model.endDatePicker
+            |> Html.map DatePickerEnd
+    ]
+    , Form.text"Title"
+        [ value invoice.title
+        , onInput ( SetFormValue ( \v -> { invoice | title = v } ) )
+        ]
+        []
+    , Form.text "URL"
+        [ value invoice.url
+        , onInput ( SetFormValue ( \v -> { invoice | url = v } ) )
+        ]
+        []
+    , Form.textarea "Comment"
+        [ value invoice.comment
+        , onInput ( SetFormValue ( \v -> { invoice | comment = v } ) )
+        ]
+        []
+    , Form.float "Total Hours"
+        [ value ( toString invoice.totalHours )
+        , onInput ( SetFormValue ( \v -> { invoice | totalHours = Form.toFloat v } ) )
+        ]
+        []
+    , Form.submit model.disabled Cancel
+    ]
+
 
 
 -- TABLE CONFIGURATION
@@ -318,19 +438,42 @@ config : Table.Config Invoice Msg
 config =
     Table.customConfig
     -- TODO: Figure out why .id is giving me trouble!
-    { toId = .date
+    { toId = .dateFrom
     , toMsg = SetTableState
     , columns =
-        [ Table.stringColumn "Date" .date
+        [ Table.stringColumn "Date From" .dateFrom
+        , Table.stringColumn "Date To" .dateTo
         , Table.stringColumn "Title" .title
         , Table.stringColumn "URL" .url
         , Table.stringColumn "Comment" .comment
-        , Table.floatColumn "Hours" .hours
-        , Form.customColumn ( Form.tableButton Edit )
-        , Form.customColumn ( Form.tableButton Delete )
+        , Table.floatColumn "Total Hours" .totalHours
+        , customColumn "" ( viewButton Edit "Edit" )
+        , customColumn "" ( viewButton Delete "Delete" )
         ]
     , customizations =
-        { defaultCustomizations | rowAttrs = Form.toRowAttrs }
+        { defaultCustomizations | rowAttrs = toRowAttrs }
     }
+
+
+toRowAttrs : Invoice -> List ( Attribute Msg )
+toRowAttrs sport =
+    [ style [ ( "background", "white" ) ]
+    ]
+
+
+customColumn : String -> ( Invoice -> Table.HtmlDetails Msg ) -> Table.Column Invoice Msg
+customColumn name viewElement =
+    Table.veryCustomColumn
+        { name = name
+        , viewData = viewElement
+        , sorter = Table.unsortable
+        }
+
+
+viewButton : ( Invoice -> msg ) -> String -> Invoice -> Table.HtmlDetails msg
+viewButton msg name sport =
+    Table.HtmlDetails []
+        [ button [ onClick <| msg <| sport ] [ text name ]
+        ]
 
 

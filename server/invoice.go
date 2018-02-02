@@ -23,6 +23,7 @@ func (c *InvoiceController) Create(ctx *app.CreateInvoiceContext) error {
 
 	res := &app.InvoiceMedia{}
 	return ctx.OK(res)
+
 	// InvoiceController_Create: end_implement
 }
 
@@ -34,6 +35,7 @@ func (c *InvoiceController) Delete(ctx *app.DeleteInvoiceContext) error {
 
 	res := &app.InvoiceMediaTiny{}
 	return ctx.OKTiny(res)
+
 	// InvoiceController_Delete: end_implement
 }
 
@@ -45,6 +47,7 @@ func (c *InvoiceController) List(ctx *app.ListInvoiceContext) error {
 
 	res := app.InvoiceMediaCollection{}
 	return ctx.OK(res)
+
 	// InvoiceController_List: end_implement
 }
 
@@ -56,6 +59,7 @@ func (c *InvoiceController) Show(ctx *app.ShowInvoiceContext) error {
 
 	res := &app.InvoiceMedia{}
 	return ctx.OK(res)
+
 	// InvoiceController_Show: end_implement
 }
 
@@ -67,5 +71,6 @@ func (c *InvoiceController) Update(ctx *app.UpdateInvoiceContext) error {
 
 	res := &app.InvoiceMediaTiny{}
 	return ctx.OKTiny(res)
+
 	// InvoiceController_Update: end_implement
 }
