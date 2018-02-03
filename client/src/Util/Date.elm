@@ -15,8 +15,8 @@ type alias Parsed =
     }
 
 
-fromMonth : Dict String String
-fromMonth =
+fromMonthString : Dict String String
+fromMonthString =
     Dict.fromList
     [
         ( "Jan", "01" )
@@ -34,6 +34,25 @@ fromMonth =
     ]
 
 
+fromMonthInt : Dict String String
+fromMonthInt =
+    Dict.fromList
+    [
+        ( "01", "Jan" )
+        , ( "02", "Feb" )
+        , ( "03", "Mar" )
+        , ( "04", "Apr" )
+        , ( "05", "May" )
+        , ( "06", "Jun" )
+        , ( "07", "Jul" )
+        , ( "08", "Aug" )
+        , ( "09", "Sep" )
+        , ( "10", "Oct" )
+        , ( "11", "Nov" )
+        , ( "12", "Dec" )
+    ]
+
+
 now : ( Date -> msg ) -> Cmd msg
 now msg =
     Date.now
@@ -46,7 +65,7 @@ parse date =
         year = toString ( Date.year date )
 
         month = toString ( Date.month date )
-        mo = Dict.get month fromMonth |> Maybe.withDefault "--"
+        mo = Dict.get month fromMonthString |> Maybe.withDefault "--"
 
         day = toString ( Date.day date )
         d = if ( day |> String.length ) == 1 then ( (++) "0" day ) else day
@@ -79,14 +98,54 @@ simple date =
     let
         h = date |> parse
     in
-    h.year ++ "/" ++ h.month ++ "/" ++ h.day
+    h.year ++ "-" ++ h.month ++ "-" ++ h.day
 
 
 -- http://package.elm-lang.org/packages/rluiten/elm-date-extra/latest
 -- https://github.com/rluiten/elm-date-extra/blob/9.2.3/src/Date/Extra/Utils.elm
+--
+-- NOTE: I found that passing a string date like "2018/02/02" would return a date
+-- of:
+--
+--      <Fri Feb 01 2018 00:00:00 GMT-0500 (EST)>
+--
+-- Using the month string, i.e., "Feb" gives me the expected date.
 unsafeFromString : String -> Date
 unsafeFromString stringDate =
-    case Date.fromString stringDate of
+    let
+        parts =
+            stringDate
+                |> String.split "-"
+
+        year =
+            parts
+                |> List.head
+                |> Maybe.withDefault ""
+
+        month =
+            parts
+                |> List.drop 1
+                |> List.head
+                |> Maybe.withDefault ""
+
+        m =
+            fromMonthInt
+                |> Dict.get month
+                |> Maybe.withDefault ""
+
+        day =
+            parts
+                |> List.drop 2
+                |> List.head
+                |> Maybe.withDefault ""
+
+        sd =
+            [ year
+            , m
+            , day
+            ] |> String.join "-"
+    in
+    case Date.fromString sd of
         Err err ->
             Debug.crash "unsafeFromString"
 

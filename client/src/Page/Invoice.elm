@@ -227,6 +227,8 @@ update url msg model =
             { model |
                 action = None
                 , editing = Nothing
+                , startDate = Nothing
+                , endDate = Nothing
             } ! [ subCmd ]
 
         Deleted ( Ok deletedInvoice ) ->
@@ -238,18 +240,11 @@ update url msg model =
             model ! []
 
         Edit invoice ->
-            -- I need to figure out how to display the dates from the model when editing!
-            -- http://package.elm-lang.org/packages/elm-community/elm-datepicker/7.2.6/DatePicker#pick
---            let
---                dateFrom = invoice.dateFrom |> Util.Date.unsafeFromString |> Just
---                dateTo = invoice.dateTo |> Util.Date.unsafeFromString |> Just
---
---                msg = DatePicker.update (endSettings model.startDate) ( DatePicker.pick dateFrom ) invoice model.endDatePicker
---                DatePicker.update (endSettings model.endDate) ( DatePicker.pick dateTo ) invoice model.endDatePicker
---            in
             { model |
                 action = Editing
                 , editing = Just invoice
+                , startDate = invoice.dateFrom |> Util.Date.unsafeFromString |> Just
+                , endDate = invoice.dateTo |> Util.Date.unsafeFromString |> Just
             } ! []
 
         Getted ( Ok invoices ) ->
@@ -277,6 +272,8 @@ update url msg model =
             in
             { model |
                 action = None
+                , startDate = Nothing
+                , endDate = Nothing
             } ! [ subCmd ]
 
         Posted ( Ok invoice ) ->
@@ -408,13 +405,6 @@ drawView model =
 
 formFields : Model -> Invoice -> List ( Html Msg )
 formFields model invoice =
---    let
---        dateFrom = invoice.dateFrom |> Util.Date.unsafeFromString |> Just
---        dateTo = invoice.dateTo |> Util.Date.unsafeFromString |> Just
---
---        df = (Debug.log "dateFrom" dateFrom)
---        dt = (Debug.log "dateTo" dateTo)
---    in
     [ Form.text"Title"
         [ value invoice.title
         , onInput ( SetFormValue ( \v -> { invoice | title = v } ) )
