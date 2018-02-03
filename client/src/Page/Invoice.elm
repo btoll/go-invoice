@@ -4,13 +4,14 @@ import Data.Invoice exposing (Invoice, new)
 import Date exposing (Date, Day(..), day, dayOfWeek, month, year)
 import DatePicker exposing (defaultSettings, DateEvent(..))
 import Html exposing (Html, Attribute, button, div, form, h1, input, label, node, section, text)
-import Html.Attributes exposing (action, checked, disabled, for, id, style, type_, value)
+import Html.Attributes exposing (action, autofocus, checked, disabled, for, id, style, type_, value)
 import Html.Events exposing (onClick, onInput, onSubmit)
 import Html.Lazy exposing (lazy)
 import Http
 import Request.Invoice
 import Table exposing (defaultCustomizations)
 import Task exposing (Task)
+import Time
 import Util.Date
 import Views.Form as Form
 
@@ -140,6 +141,8 @@ update url msg model =
             { model |
                 action = None
                 , editing = Nothing
+                , startDate = Nothing
+                , endDate = Nothing
             } ! []
 
         DatePickerEnd subMsg ->
@@ -235,6 +238,15 @@ update url msg model =
             model ! []
 
         Edit invoice ->
+            -- I need to figure out how to display the dates from the model when editing!
+            -- http://package.elm-lang.org/packages/elm-community/elm-datepicker/7.2.6/DatePicker#pick
+--            let
+--                dateFrom = invoice.dateFrom |> Util.Date.unsafeFromString |> Just
+--                dateTo = invoice.dateTo |> Util.Date.unsafeFromString |> Just
+--
+--                msg = DatePicker.update (endSettings model.startDate) ( DatePicker.pick dateFrom ) invoice model.endDatePicker
+--                DatePicker.update (endSettings model.endDate) ( DatePicker.pick dateTo ) invoice model.endDatePicker
+--            in
             { model |
                 action = Editing
                 , editing = Just invoice
@@ -396,21 +408,29 @@ drawView model =
 
 formFields : Model -> Invoice -> List ( Html Msg )
 formFields model invoice =
-    [ div [] [
+--    let
+--        dateFrom = invoice.dateFrom |> Util.Date.unsafeFromString |> Just
+--        dateTo = invoice.dateTo |> Util.Date.unsafeFromString |> Just
+--
+--        df = (Debug.log "dateFrom" dateFrom)
+--        dt = (Debug.log "dateTo" dateTo)
+--    in
+    [ Form.text"Title"
+        [ value invoice.title
+        , onInput ( SetFormValue ( \v -> { invoice | title = v } ) )
+        , autofocus True
+        ]
+        []
+    , div [] [
         label [] [ text "Date From" ]
-        , DatePicker.view model.startDate ( startSettings model.endDate ) model.startDatePicker
+        , DatePicker.view model.startDate ( startSettings model.startDate ) model.startDatePicker
             |> Html.map DatePickerStart
     ]
     , div [] [
         label [] [ text "Date To" ]
-        , DatePicker.view model.endDate ( endSettings model.startDate ) model.endDatePicker
+        , DatePicker.view model.endDate ( endSettings model.endDate ) model.endDatePicker
             |> Html.map DatePickerEnd
     ]
-    , Form.text"Title"
-        [ value invoice.title
-        , onInput ( SetFormValue ( \v -> { invoice | title = v } ) )
-        ]
-        []
     , Form.text "URL"
         [ value invoice.url
         , onInput ( SetFormValue ( \v -> { invoice | url = v } ) )
@@ -441,9 +461,9 @@ config =
     { toId = .dateFrom
     , toMsg = SetTableState
     , columns =
-        [ Table.stringColumn "Date From" .dateFrom
+        [ Table.stringColumn "Title" .title
+        , Table.stringColumn "Date From" .dateFrom
         , Table.stringColumn "Date To" .dateTo
-        , Table.stringColumn "Title" .title
         , Table.stringColumn "URL" .url
         , Table.stringColumn "Comment" .comment
         , Table.floatColumn "Total Hours" .totalHours

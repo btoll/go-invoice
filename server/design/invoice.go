@@ -64,28 +64,31 @@ var InvoicePayload = Type("InvoicePayload", func() {
 		Metadata("struct:tag:datastore", "id,noindex")
 		Metadata("struct:tag:json", "id,omitempty")
 	})
-	Attribute("date", String, "Invoice date", func() {
-		Metadata("struct:tag:datastore", "date,noindex")
-		Metadata("struct:tag:json", "date,omitempty")
-	})
-	Attribute("hours", Number, "Invoice hours", func() {
-		Metadata("struct:tag:datastore", "hours,noindex")
-		Metadata("struct:tag:json", "hours,omitempty")
-	})
 	Attribute("title", String, "Invoice title", func() {
 		Metadata("struct:tag:datastore", "title,noindex")
 		Metadata("struct:tag:json", "title,omitempty")
 	})
-	Attribute("comment", String, "Invoice comment", func() {
-		Metadata("struct:tag:datastore", "comment,noindex")
-		Metadata("struct:tag:json", "comment,omitempty")
+	Attribute("dateFrom", String, "Invoice date from", func() {
+		Metadata("struct:tag:datastore", "dateFrom,noindex")
+		Metadata("struct:tag:json", "dateFrom,omitempty")
+	})
+	Attribute("dateTo", String, "Invoice date to", func() {
+		Metadata("struct:tag:datastore", "dateTo,noindex")
+		Metadata("struct:tag:json", "dateTo,omitempty")
 	})
 	Attribute("url", String, "Invoice url", func() {
 		Metadata("struct:tag:datastore", "url,noindex")
 		Metadata("struct:tag:json", "url,omitempty")
 	})
+	Attribute("comment", String, "Invoice comment", func() {
+		Metadata("struct:tag:datastore", "comment,noindex")
+		Metadata("struct:tag:json", "comment,omitempty")
+	})
+	Attribute("totalHours", Number, "Invoice total hours", func() {
+		Metadata("struct:tag:datastore", "totalHours,noindex")
+	})
 
-	Required("date", "hours", "title", "comment", "url")
+	Required("title", "dateFrom", "dateTo", "url", "comment", "totalHours")
 })
 
 var InvoiceMedia = MediaType("application/invoiceapi.invoiceentity", func() {
@@ -96,22 +99,24 @@ var InvoiceMedia = MediaType("application/invoiceapi.invoiceentity", func() {
 
 	Attributes(func() {
 		Attribute("id")
-		Attribute("date")
-		Attribute("hours")
 		Attribute("title")
-		Attribute("comment")
+		Attribute("dateFrom")
+		Attribute("dateTo")
 		Attribute("url")
+		Attribute("comment")
+		Attribute("totalHours")
 
-		Required("id", "date", "hours", "title", "comment", "url")
+		Required("id", "title", "dateFrom", "dateTo", "url", "comment", "totalHours")
 	})
 
 	View("default", func() {
 		Attribute("id")
-		Attribute("date")
-		Attribute("hours")
 		Attribute("title")
-		Attribute("comment")
+		Attribute("dateFrom")
+		Attribute("dateTo")
 		Attribute("url")
+		Attribute("comment")
+		Attribute("totalHours")
 	})
 
 	View("tiny", func() {

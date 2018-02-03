@@ -1,7 +1,8 @@
-module Util.Date exposing (parse, rfc3339, simple)
+module Util.Date exposing (now, parse, rfc3339, simple, unsafeFromString)
 
 import Date exposing (Date)
 import Dict exposing (Dict)
+import Task exposing (Task)
 
 
 
@@ -31,6 +32,12 @@ fromMonth =
         , ( "Nov", "11" )
         , ( "Dec", "12" )
     ]
+
+
+now : ( Date -> msg ) -> Cmd msg
+now msg =
+    Date.now
+        |> Task.perform msg
 
 
 parse : Date -> Parsed
@@ -73,5 +80,17 @@ simple date =
         h = date |> parse
     in
     h.year ++ "/" ++ h.month ++ "/" ++ h.day
+
+
+-- http://package.elm-lang.org/packages/rluiten/elm-date-extra/latest
+-- https://github.com/rluiten/elm-date-extra/blob/9.2.3/src/Date/Extra/Utils.elm
+unsafeFromString : String -> Date
+unsafeFromString stringDate =
+    case Date.fromString stringDate of
+        Err err ->
+            Debug.crash "unsafeFromString"
+
+        Ok date ->
+            date
 
 

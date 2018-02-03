@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/btoll/go-invoice/server/app"
+	"github.com/btoll/go-invoice/server/sql"
 	"github.com/goadesign/goa"
 )
 
@@ -21,8 +22,11 @@ func (c *InvoiceController) Create(ctx *app.CreateInvoiceContext) error {
 
 	// Put your logic here
 
-	res := &app.InvoiceMedia{}
-	return ctx.OK(res)
+	res, err := sql.Create(sql.NewInvoice(ctx.Payload))
+	if err != nil {
+		return err
+	}
+	return ctx.OK(res.(*app.InvoiceMedia))
 
 	// InvoiceController_Create: end_implement
 }
@@ -31,10 +35,11 @@ func (c *InvoiceController) Create(ctx *app.CreateInvoiceContext) error {
 func (c *InvoiceController) Delete(ctx *app.DeleteInvoiceContext) error {
 	// InvoiceController_Delete: start_implement
 
-	// Put your logic here
-
-	res := &app.InvoiceMediaTiny{}
-	return ctx.OKTiny(res)
+	err := sql.Delete(sql.NewInvoice(ctx.ID))
+	if err != nil {
+		return err
+	}
+	return ctx.OKTiny(&app.InvoiceMediaTiny{ctx.ID})
 
 	// InvoiceController_Delete: end_implement
 }
@@ -43,10 +48,11 @@ func (c *InvoiceController) Delete(ctx *app.DeleteInvoiceContext) error {
 func (c *InvoiceController) List(ctx *app.ListInvoiceContext) error {
 	// InvoiceController_List: start_implement
 
-	// Put your logic here
-
-	res := app.InvoiceMediaCollection{}
-	return ctx.OK(res)
+	collection, err := sql.List(sql.NewInvoice(nil))
+	if err != nil {
+		return err
+	}
+	return ctx.OK(collection.(app.InvoiceMediaCollection))
 
 	// InvoiceController_List: end_implement
 }
@@ -55,10 +61,9 @@ func (c *InvoiceController) List(ctx *app.ListInvoiceContext) error {
 func (c *InvoiceController) Show(ctx *app.ShowInvoiceContext) error {
 	// InvoiceController_Show: start_implement
 
-	// Put your logic here
-
-	res := &app.InvoiceMedia{}
-	return ctx.OK(res)
+	//	res := &app.InvoiceMedia{}
+	//	return ctx.OK(res)
+	return nil
 
 	// InvoiceController_Show: end_implement
 }
@@ -67,10 +72,11 @@ func (c *InvoiceController) Show(ctx *app.ShowInvoiceContext) error {
 func (c *InvoiceController) Update(ctx *app.UpdateInvoiceContext) error {
 	// InvoiceController_Update: start_implement
 
-	// Put your logic here
-
-	res := &app.InvoiceMediaTiny{}
-	return ctx.OKTiny(res)
+	err := sql.Update(sql.NewInvoice(ctx.Payload))
+	if err != nil {
+		return err
+	}
+	return ctx.OKTiny(&app.InvoiceMediaTiny{*ctx.Payload.ID})
 
 	// InvoiceController_Update: end_implement
 }
