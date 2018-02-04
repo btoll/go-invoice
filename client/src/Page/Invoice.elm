@@ -103,7 +103,7 @@ init url =
         , endDatePicker = endDatePicker
         } ! [ Cmd.map DatePickerStart startDatePickerFx
             , Cmd.map DatePickerEnd endDatePickerFx
-            , Request.Invoice.get url |> Http.send Getted
+            , Request.Invoice.get url |> Http.send FetchedInvoice
             ]
 
 
@@ -112,15 +112,17 @@ init url =
 
 type Msg
     = Add
+    | AddEntry Invoice
     | Cancel
     | DatePickerEnd DatePicker.Msg
     | DatePickerStart DatePicker.Msg
     | Delete Invoice
     | Deleted ( Result Http.Error Invoice )
     | Edit Invoice
-    | Getted ( Result Http.Error ( List Invoice ) )
+    | FetchedInvoice ( Result Http.Error ( List Invoice ) )
     | Post
     | Posted ( Result Http.Error Invoice )
+    | Print Invoice
     | Put
     | Putted ( Result Http.Error Int )
     | SetFormValue ( String -> Invoice ) String
@@ -136,6 +138,9 @@ update url msg model =
                 action = Adding
                 , editing = Nothing
             } ! []
+
+        AddEntry invoice ->
+            model ! []
 
         Cancel ->
             { model |
@@ -247,13 +252,13 @@ update url msg model =
                 , endDate = invoice.dateTo |> Util.Date.unsafeFromString |> Just
             } ! []
 
-        Getted ( Ok invoices ) ->
+        FetchedInvoice ( Ok invoices ) ->
             { model |
                 invoices = invoices
                 , tableState = Table.initialSort "ID"
             } ! []
 
-        Getted ( Err err ) ->
+        FetchedInvoice ( Err err ) ->
             { model |
                 invoices = []
                 , tableState = Table.initialSort "ID"
@@ -296,6 +301,9 @@ update url msg model =
             { model |
                 editing = Nothing
             } ! []
+
+        Print invoice ->
+            model ! []
 
         Put ->
             let
@@ -457,8 +465,10 @@ config =
         , Table.stringColumn "URL" .url
         , Table.stringColumn "Comment" .comment
         , Table.floatColumn "Total Hours" .totalHours
+        , customColumn "" ( viewButton AddEntry "Add Entry" )
         , customColumn "" ( viewButton Edit "Edit" )
         , customColumn "" ( viewButton Delete "Delete" )
+        , customColumn "" ( viewButton Print "Print" )
         ]
     , customizations =
         { defaultCustomizations | rowAttrs = toRowAttrs }

@@ -21,6 +21,8 @@ func main() {
 	// Mount "Invoice" controller
 	c := NewInvoiceController(service)
 	app.MountInvoiceController(service, c)
+	d := NewEntryController(service)
+	app.MountEntryController(service, d)
 
 	// Start service
 	if err := service.ListenAndServe(":8080"); err != nil {

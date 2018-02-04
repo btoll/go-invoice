@@ -3,7 +3,7 @@
 SHELL 		= /bin/sh
 CC      	= go
 GENERATED	= .__gen__
-GOADESIGN	= design/api.go design/invoice.go
+GOADESIGN	= design/api.go design/entry.go design/invoice.go
 TARGET		= go-invoice
 WATCHER		= entr
 
@@ -16,7 +16,7 @@ $(GENERATED): $(GOADESIGN)
 	@# We only want to modify the generated file when successful.
 	@touch $(GENERATED)
 
-$(TARGET): *.go sql/*.go
+$(TARGET): *.go sql/*.go $(GENERATED)
 	$(CC) build -o $(TARGET)
 	@echo [make] Success!
 

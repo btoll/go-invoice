@@ -9,6 +9,7 @@ type ActivePage
     = Other
     | Home
     | Invoice
+    | Entry
 
 
 type alias SiteLink msg =
@@ -21,7 +22,8 @@ type alias SiteLink msg =
 siteLinks : ActivePage -> List ( SiteLink a )
 siteLinks page =
     [ SiteLink Home Route.Home [ text "Home" ]
-    , SiteLink Invoice Route.Invoice [ text "Invoice" ]
+    , SiteLink Invoice Route.Invoice [ text "Invoices" ]
+    , SiteLink Entry Route.Entry [ text "Entries" ]
     ]
 
 

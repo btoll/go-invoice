@@ -7,7 +7,6 @@ import (
 )
 
 type SQL interface {
-	//	Verifier
 	Create(db *mysql.DB) (interface{}, error)
 	Read(db *mysql.DB) (interface{}, error)
 	Update(db *mysql.DB) error

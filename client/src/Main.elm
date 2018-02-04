@@ -4,6 +4,7 @@ import Data.Invoice exposing (Invoice)
 import Html exposing (Html, text)
 import Http
 import Navigation
+import Page.Entry as Entry
 import Page.Invoice as Invoice
 import Page.NotFound as NotFound
 import Ports exposing (fileContentRead, fileSelected)
@@ -26,11 +27,10 @@ type alias Flags =
 
 type Page
     = Blank
-    | NotFound
---    | Home Home.Model
+    | Entry Entry.Model
     | Errored String
---    | Home Home.Model
     | Invoice Invoice.Model
+    | NotFound
 
 
 
@@ -68,13 +68,25 @@ initialPage =
 
 type Msg
     = SetRoute ( Maybe Route )
-    | InvoiceLoaded ( Result Http.Error Invoice.Model )
+    | EntryMsg Entry.Msg
     | InvoiceMsg Invoice.Msg
 
 
 setRoute : Maybe Route -> Model -> ( Model, Cmd Msg )
 setRoute maybeRoute model =
     case maybeRoute of
+        Just Route.Home ->
+            { model | page = Blank } ! []
+
+        Just Route.Entry ->
+            let
+                ( subModel, subMsg ) =
+                    Entry.init model.build.url
+            in
+                { model |
+                    page = Entry subModel
+                } ! [ Cmd.map EntryMsg subMsg ]
+
         Just Route.Invoice ->
             let
                 ( subModel, subMsg ) =
@@ -83,10 +95,6 @@ setRoute maybeRoute model =
                 { model |
                     page = Invoice subModel
                 } ! [ Cmd.map InvoiceMsg subMsg ]
---            ( model, Invoice.init model.build.url |> Task.attempt InvoiceLoaded )
-
-        Just Route.Home ->
-            { model | page = Blank } ! []
 
         Nothing ->
             { model | page = Errored "404: Page not found." } ! []
@@ -107,11 +115,8 @@ update msg model =
             ( SetRoute route, _ ) ->
                 setRoute route model
 
-            ( InvoiceLoaded ( Ok subModel ), _ ) ->
-                { model | page = Invoice subModel } ! []
-
-            ( InvoiceLoaded ( Err err ), _ ) ->
-                model ! []
+            ( EntryMsg subMsg, Entry subModel ) ->
+                toPage Entry EntryMsg Entry.update subMsg subModel
 
             ( InvoiceMsg subMsg, Invoice subModel ) ->
                 toPage Invoice InvoiceMsg Invoice.update subMsg subModel
@@ -134,6 +139,11 @@ view model =
             -- data via HTTP. We could also render a spinner here.
             text ""
                 |> frame Page.Home
+
+        Entry subModel ->
+            Entry.view subModel
+                |> frame Page.Entry
+                |> Html.map EntryMsg
 
         Invoice subModel ->
             Invoice.view subModel

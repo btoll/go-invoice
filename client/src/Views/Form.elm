@@ -42,13 +42,13 @@ checkbox name attrs =
 
 float : String -> List ( Attribute msg ) -> List ( Html msg ) -> Html msg
 float name attrs =
-    inputControl "number" name ( attrs |> (::) ( step "0.01" ) )
+    inputControl "number" name ( attrs |> (::) ( step "0.25" ) )
 
 
 -- TODO: The compiler doesn't like this annotation!
---option : String -> String -> List ( Attribute msg ) -> List ( Html msg ) -> Html msg
-option selectedOption s =
-    Html.option [ selected ( (==) s selectedOption ), value s ] [ Html.text s ]
+--option : String -> String -> ( String, String ) -> List ( Attribute msg ) -> List ( Html msg ) -> Html msg
+option selectedOption ( val, txt ) =
+    Html.option [ selected ( (==) val selectedOption ), value val ] [ Html.text txt ]
 
 
 -- Remove any spaces in name (`id` attr doesn't allow for spaces).

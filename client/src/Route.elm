@@ -1,7 +1,5 @@
 module Route exposing (Route(..), fromLocation, href, modifyUrl)
 
---import Data.Article as Article
---import Data.User as User exposing (Username)
 import Html exposing (Attribute)
 import Html.Attributes as Attr
 import Navigation exposing (Location)
@@ -14,12 +12,14 @@ import UrlParser as Url exposing ((</>), Parser, oneOf, parseHash, s, string)
 type Route
     = Home
     | Invoice
+    | Entry
 
 
 route : Parser (Route -> a) a
 route =
     oneOf
         [ Url.map Home (s "")
+        , Url.map Entry (s "entry")
         , Url.map Invoice (s "invoice")
         ]
 
@@ -39,6 +39,8 @@ routeToString page =
                 Invoice ->
                     [ "invoice" ]
 
+                Entry ->
+                    [ "entry" ]
     in
         "#/" ++ String.join "/" pieces
 

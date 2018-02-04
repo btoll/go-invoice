@@ -33,6 +33,7 @@ nav li a {
 }
 /* Highlight the link of the current page. */
 #home nav li a[href$="/"],
+#entry nav li a[href$="entry"],
 #invoice nav li a[href$="invoice"] {
     background: #265a88;
 }
@@ -96,3 +97,8 @@ form > div:last-child input:last-child {
     margin-left: 0;
 }
 
+/* Invoice <select> element on Entry page */
+#invoiceSelection {
+    margin: 20px 20px 20px 10px;
+    padding: 0;
+}
