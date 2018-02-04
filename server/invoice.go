@@ -20,8 +20,6 @@ func NewInvoiceController(service *goa.Service) *InvoiceController {
 func (c *InvoiceController) Create(ctx *app.CreateInvoiceContext) error {
 	// InvoiceController_Create: start_implement
 
-	// Put your logic here
-
 	res, err := sql.Create(sql.NewInvoice(ctx.Payload))
 	if err != nil {
 		return err

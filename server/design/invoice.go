@@ -86,6 +86,10 @@ var InvoicePayload = Type("InvoicePayload", func() {
 	})
 	Attribute("totalHours", Number, "Invoice total hours", func() {
 		Metadata("struct:tag:datastore", "totalHours,noindex")
+		// Note that the following statement is needed b/c the json response was returned with
+		// `TotalHours` in the payload which was not being correctly parsed into the client-side
+		// model b/c Elm was expecting it to be camel-case `totalHours`!
+		Metadata("struct:tag:json", "totalHours,omitempty")
 	})
 
 	Required("title", "dateFrom", "dateTo", "url", "comment", "totalHours")
