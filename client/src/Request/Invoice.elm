@@ -1,4 +1,4 @@
-module Request.Invoice exposing (delete, get, post, put)
+module Request.Invoice exposing (delete, list, post, print, put)
 
 import Http
 import Data.Invoice exposing (Invoice, decoder, encoder, manyDecoder, succeed)
@@ -18,10 +18,16 @@ delete url invoice =
         }
 
 
-get : String -> Http.Request ( List Invoice )
-get url =
+get : String -> String -> Http.Request ( List Invoice )
+get url method =
     manyDecoder
-        |> Http.get ( (++) url "/invoice/list" )
+        |> Http.get ( url ++ "/invoice/" ++ method )
+
+
+list : String -> Http.Request ( List Invoice )
+list url =
+    "list"
+        |> get url
 
 
 post : String -> Invoice -> Http.Request Invoice
@@ -34,6 +40,12 @@ post url invoice =
     in
         decoder
             |> Http.post ( (++) url "/invoice/" ) body
+
+
+print : String -> String -> Http.Request ( List Invoice )
+print url invoice_id =
+    (++) "print/" invoice_id
+        |> get url
 
 
 put : String -> Invoice -> Http.Request Int

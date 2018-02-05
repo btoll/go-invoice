@@ -103,7 +103,7 @@ init url =
         , endDatePicker = endDatePicker
         } ! [ Cmd.map DatePickerStart startDatePickerFx
             , Cmd.map DatePickerEnd endDatePickerFx
-            , Request.Invoice.get url |> Http.send FetchedInvoice
+            , Request.Invoice.list url |> Http.send FetchedInvoice
             ]
 
 
@@ -123,6 +123,7 @@ type Msg
     | Post
     | Posted ( Result Http.Error Invoice )
     | Print Invoice
+    | Printed ( Result Http.Error ( List Invoice ) )
     | Put
     | Putted ( Result Http.Error Int )
     | SetFormValue ( String -> Invoice ) String
@@ -303,6 +304,18 @@ update url msg model =
             } ! []
 
         Print invoice ->
+            model !
+            [
+                invoice.id |> toString
+                    |> Request.Invoice.print url
+                        |> Http.toTask
+                        |> Task.attempt Printed
+            ]
+
+        Printed ( Ok id ) ->
+            model ! []
+
+        Printed ( Err err ) ->
             model ! []
 
         Put ->
@@ -497,9 +510,9 @@ customColumn name viewElement =
 
 
 viewButton : ( Invoice -> msg ) -> String -> Invoice -> Table.HtmlDetails msg
-viewButton msg name sport =
+viewButton msg name invoice =
     Table.HtmlDetails []
-        [ button [ onClick <| msg <| sport ] [ text name ]
+        [ button [ onClick <| msg <| invoice ] [ text name ]
         ]
 
 

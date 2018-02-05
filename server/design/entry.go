@@ -73,7 +73,6 @@ var EntryPayload = Type("EntryPayload", func() {
 	})
 	Attribute("title", String, "Entry title", func() {
 		Metadata("struct:tag:datastore", "title,noindex")
-		Metadata("struct:tag:json", "title,omitempty")
 	})
 	Attribute("date", String, "Entry date", func() {
 		Metadata("struct:tag:datastore", "date,noindex")
@@ -81,11 +80,9 @@ var EntryPayload = Type("EntryPayload", func() {
 	})
 	Attribute("url", String, "Entry url", func() {
 		Metadata("struct:tag:datastore", "url,noindex")
-		Metadata("struct:tag:json", "url,omitempty")
 	})
 	Attribute("comment", String, "Entry comment", func() {
 		Metadata("struct:tag:datastore", "comment,noindex")
-		Metadata("struct:tag:json", "comment,omitempty")
 	})
 	Attribute("hours", Number, "Entry hours", func() {
 		Metadata("struct:tag:datastore", "hours,noindex")

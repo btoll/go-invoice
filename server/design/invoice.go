@@ -55,6 +55,15 @@ var _ = Resource("Invoice", func() {
 		Description("Get all invoices")
 		Response(OK, CollectionOf(InvoiceMedia))
 	})
+
+	Action("print", func() {
+		Routing(GET("/print/:id"))
+		Params(func() {
+			Param("id", Integer, "Invoice ID")
+		})
+		Description("Print an invoice")
+		Response(OK, "application/json")
+	})
 })
 
 var InvoicePayload = Type("InvoicePayload", func() {

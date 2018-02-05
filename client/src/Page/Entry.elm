@@ -83,7 +83,7 @@ init url =
         , date = Nothing
         , datePicker = datePicker
         } ! [ Cmd.map DatePicker datePickerFx
-            , Request.Invoice.get url |> Http.send FetchedInvoice
+            , Request.Invoice.list url |> Http.send FetchedInvoice
             ]
 
 

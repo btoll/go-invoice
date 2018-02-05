@@ -40,12 +40,12 @@ func Read(s SQL) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	coll, err := s.Read(db)
+	row, err := s.Read(db)
 	if err != nil {
 		return nil, err
 	}
 	cleanup(db)
-	return coll, nil
+	return row, nil
 }
 
 func Update(s SQL) error {

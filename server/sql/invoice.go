@@ -16,10 +16,11 @@ func NewInvoice(payload interface{}) *Invoice {
 	return &Invoice{
 		Data: payload,
 		Stmt: map[string]string{
-			"DELETE": "DELETE FROM invoice WHERE id=?",
-			"INSERT": "INSERT invoice SET dateFrom=?,dateTo=?,title=?,url=?,comment=?,rate=?,totalHours=?",
-			"SELECT": "SELECT %s FROM invoice",
-			"UPDATE": "UPDATE invoice SET dateFrom=?,dateTo=?,title=?,url=?,comment=?,rate=?,totalHours=? WHERE id=?",
+			"DELETE":  "DELETE FROM invoice WHERE id=?",
+			"GET_ONE": "SELECT * FROM invoice WHERE id=%d",
+			"INSERT":  "INSERT invoice SET dateFrom=?,dateTo=?,title=?,url=?,comment=?,rate=?,totalHours=?",
+			"SELECT":  "SELECT %s FROM invoice",
+			"UPDATE":  "UPDATE invoice SET dateFrom=?,dateTo=?,title=?,url=?,comment=?,rate=?,totalHours=? WHERE id=?",
 		},
 	}
 }
@@ -51,7 +52,34 @@ func (s *Invoice) Create(db *mysql.DB) (interface{}, error) {
 }
 
 func (s *Invoice) Read(db *mysql.DB) (interface{}, error) {
-	return nil, nil
+	rows, err := db.Query(fmt.Sprintf(s.Stmt["GET_ONE"], s.Data.(int)))
+	if err != nil {
+		return nil, err
+	}
+	row := &app.InvoiceMedia{}
+	for rows.Next() {
+		var id int
+		var title string
+		var dateFrom string
+		var dateTo string
+		var url string
+		var comment string
+		var rate float64
+		var totalHours float64
+		err = rows.Scan(&id, &title, &dateFrom, &dateTo, &url, &comment, &rate, &totalHours)
+		if err != nil {
+			return nil, err
+		}
+		row.ID = id
+		row.Title = title
+		row.DateFrom = dateFrom
+		row.DateTo = dateTo
+		row.URL = url
+		row.Comment = comment
+		row.Rate = rate
+		row.TotalHours = totalHours
+	}
+	return row, nil
 }
 
 func (s *Invoice) Update(db *mysql.DB) error {
