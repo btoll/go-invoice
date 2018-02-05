@@ -439,6 +439,11 @@ formFields model invoice =
         , onInput ( SetFormValue ( \v -> { invoice | comment = v } ) )
         ]
         []
+    , Form.float "Rate"
+        [ value ( toString invoice.rate )
+        , onInput ( SetFormValue ( \v -> { invoice | rate = Form.toFloat v } ) )
+        ]
+        []
     , Form.float "Total Hours"
         [ value ( toString invoice.totalHours )
         , onInput ( SetFormValue ( \v -> { invoice | totalHours = Form.toFloat v } ) )
@@ -464,6 +469,7 @@ config =
         , Table.stringColumn "Date To" .dateTo
         , Table.stringColumn "URL" .url
         , Table.stringColumn "Comment" .comment
+        , Table.floatColumn "Rate" .rate
         , Table.floatColumn "Total Hours" .totalHours
         , customColumn "" ( viewButton AddEntry "Add Entry" )
         , customColumn "" ( viewButton Edit "Edit" )

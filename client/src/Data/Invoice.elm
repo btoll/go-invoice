@@ -13,6 +13,7 @@ type alias Invoice =
     , dateTo : String
     , url : String
     , comment : String
+    , rate : Float
     , totalHours : Float
     }
 
@@ -25,6 +26,7 @@ new =
     , dateTo = ""
     , url = ""
     , comment = ""
+    , rate = 0.00
     , totalHours = 0.00
     }
 
@@ -38,6 +40,7 @@ decoder =
         |> required "dateTo" string
         |> optional "url" string ""
         |> optional "comment" string ""
+        |> optional "rate" float 0.00
         |> optional "totalHours" float 0.00
 
 
@@ -56,6 +59,7 @@ encoder invoice =
         , ( "url", Encode.string invoice.url )
         , ( "comment", Encode.string invoice.comment )
         , ( "totalHours", Encode.float invoice.totalHours )
+        , ( "rate", Encode.float invoice.rate )
         ]
 
 succeed : a -> Decoder a

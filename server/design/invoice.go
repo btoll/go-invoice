@@ -84,6 +84,10 @@ var InvoicePayload = Type("InvoicePayload", func() {
 		Metadata("struct:tag:datastore", "comment,noindex")
 		Metadata("struct:tag:json", "comment,omitempty")
 	})
+	Attribute("rate", Number, "Invoice rate", func() {
+		Metadata("struct:tag:datastore", "rate,noindex")
+		Metadata("struct:tag:json", "rate,omitempty")
+	})
 	Attribute("totalHours", Number, "Invoice total hours", func() {
 		Metadata("struct:tag:datastore", "totalHours,noindex")
 		// Note that the following statement is needed b/c the json response was returned with
@@ -92,7 +96,7 @@ var InvoicePayload = Type("InvoicePayload", func() {
 		Metadata("struct:tag:json", "totalHours,omitempty")
 	})
 
-	Required("title", "dateFrom", "dateTo", "url", "comment", "totalHours")
+	Required("title", "dateFrom", "dateTo", "url", "comment", "rate", "totalHours")
 })
 
 var InvoiceMedia = MediaType("application/invoiceapi.invoiceentity", func() {
@@ -108,9 +112,10 @@ var InvoiceMedia = MediaType("application/invoiceapi.invoiceentity", func() {
 		Attribute("dateTo")
 		Attribute("url")
 		Attribute("comment")
+		Attribute("rate")
 		Attribute("totalHours")
 
-		Required("id", "title", "dateFrom", "dateTo", "url", "comment", "totalHours")
+		Required("id", "title", "dateFrom", "dateTo", "url", "comment", "rate", "totalHours")
 	})
 
 	View("default", func() {
@@ -120,6 +125,7 @@ var InvoiceMedia = MediaType("application/invoiceapi.invoiceentity", func() {
 		Attribute("dateTo")
 		Attribute("url")
 		Attribute("comment")
+		Attribute("rate")
 		Attribute("totalHours")
 	})
 
