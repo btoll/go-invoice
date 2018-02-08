@@ -14,6 +14,7 @@ import Task exposing (Task)
 import Time
 import Util.Date
 import Views.Form as Form
+import Views.Modal as Modal
 
 
 
@@ -31,10 +32,13 @@ type alias Model =
     , endDate : Maybe Date
     , startDatePicker : DatePicker.DatePicker
     , endDatePicker : DatePicker.DatePicker
+
+    , showModal : ( Bool, Maybe Modal.Modal )
     }
 
 
 type Action = None | Adding | Editing
+
 
 
 commonSettings : DatePicker.Settings
@@ -56,10 +60,10 @@ startSettings endDate =
                             > Date.toTime endDate
                             || (commonSettings.isDisabled d)
     in
-        { commonSettings
-            | placeholder = ""
-            , isDisabled = isDisabled
-        }
+    { commonSettings
+        | placeholder = ""
+        , isDisabled = isDisabled
+    }
 
 
 endSettings : Maybe Date -> DatePicker.Settings
@@ -76,10 +80,10 @@ endSettings startDate =
                             < Date.toTime startDate
                             || (commonSettings.isDisabled d)
     in
-        { commonSettings
-            | placeholder = ""
-            , isDisabled = isDisabled
-        }
+    { commonSettings
+        | placeholder = ""
+        , isDisabled = isDisabled
+    }
 
 
 init : String -> ( Model, Cmd Msg )
@@ -91,20 +95,22 @@ init url =
         ( endDatePicker, endDatePickerFx ) =
             DatePicker.init
     in
-        { tableState = Table.initialSort "ID"
-        , action = None
-        , editing = Nothing
-        , disabled = True
-        , invoices = []
+    { tableState = Table.initialSort "ID"
+    , action = None
+    , editing = Nothing
+    , disabled = True
+    , invoices = []
 
-        , startDate = Nothing
-        , endDate = Nothing
-        , startDatePicker = startDatePicker
-        , endDatePicker = endDatePicker
-        } ! [ Cmd.map DatePickerStart startDatePickerFx
-            , Cmd.map DatePickerEnd endDatePickerFx
-            , Request.Invoice.list url |> Http.send FetchedInvoice
-            ]
+    , startDate = Nothing
+    , endDate = Nothing
+    , startDatePicker = startDatePicker
+    , endDatePicker = endDatePicker
+
+    , showModal = ( False, Nothing )
+    } ! [ Cmd.map DatePickerStart startDatePickerFx
+        , Cmd.map DatePickerEnd endDatePickerFx
+        , Request.Invoice.list url |> Http.send FetchedInvoice
+        ]
 
 
 -- UPDATE
@@ -114,6 +120,7 @@ type Msg
     = Add
     | AddEntry Invoice
     | Cancel
+    | ModalMsg Modal.Msg
     | DatePickerEnd DatePicker.Msg
     | DatePickerStart DatePicker.Msg
     | Delete Invoice
@@ -122,8 +129,9 @@ type Msg
     | FetchedInvoice ( Result Http.Error ( List Invoice ) )
     | Post
     | Posted ( Result Http.Error Invoice )
+    | PrintPreview Invoice
     | Print Invoice
-    | Printed ( Result Http.Error ( List Invoice ) )
+    | Printed ( Result Http.Error Invoice )
     | Put
     | Putted ( Result Http.Error Int )
     | SetFormValue ( String -> Invoice ) String
@@ -151,10 +159,24 @@ update url msg model =
                 , endDate = Nothing
             } ! []
 
+        ModalMsg subMsg ->
+            let
+                ( bool, cmd ) =
+                    ( \invoice ->
+                        Request.Invoice.delete url invoice
+                            |> Http.toTask
+                            |> Task.attempt Deleted
+                    ) |> Modal.update subMsg
+            in
+            { model |
+                showModal = ( bool, Nothing )
+            } ! [ cmd ]
+
         DatePickerEnd subMsg ->
             let
                 ( newDatePicker, datePickerFx, dateEvent ) =
-                    DatePicker.update (endSettings model.startDate) subMsg model.endDatePicker
+                    model.endDatePicker
+                    |> DatePicker.update (endSettings model.startDate) subMsg
 
                 ( newDate, newInvoice ) =
                     let
@@ -190,7 +212,8 @@ update url msg model =
         DatePickerStart subMsg ->
             let
                 ( newDatePicker, datePickerFx, dateEvent ) =
-                    DatePicker.update (startSettings model.startDate) subMsg model.startDatePicker
+                    model.startDatePicker
+                        |> DatePicker.update (startSettings model.startDate) subMsg
 
                 ( newDate, newInvoice ) =
                     let
@@ -224,25 +247,26 @@ update url msg model =
             } ! [ Cmd.map DatePickerStart datePickerFx ]
 
         Delete invoice ->
-            let
-                subCmd =
-                    Request.Invoice.delete url invoice
-                        |> Http.toTask
-                        |> Task.attempt Deleted
-            in
             { model |
-                action = None
-                , editing = Nothing
-                , startDate = Nothing
-                , endDate = Nothing
-            } ! [ subCmd ]
+                showModal =
+                    ( True
+                    , invoice |> Modal.Delete |> Just
+                    )
+            } ! []
 
         Deleted ( Ok deletedInvoice ) ->
             { model |
                 invoices = model.invoices |> List.filter ( \m -> deletedInvoice.id /= m.id )
+                , action = None
+                , editing = Nothing
+                , startDate = Nothing
+                , endDate = Nothing
             } ! []
 
         Deleted ( Err err ) ->
+            let
+                e = (Debug.log "err" err)
+            in
             model ! []
 
         Edit invoice ->
@@ -267,14 +291,15 @@ update url msg model =
 
         Post ->
             let
-                subCmd = case model.editing of
-                    Nothing ->
-                        Cmd.none
+                subCmd =
+                    case model.editing of
+                        Nothing ->
+                            Cmd.none
 
-                    Just invoice ->
-                        Request.Invoice.post url invoice
-                            |> Http.toTask
-                            |> Task.attempt Posted
+                        Just invoice ->
+                            Request.Invoice.post url invoice
+                                |> Http.toTask
+                                |> Task.attempt Posted
             in
             { model |
                 action = None
@@ -303,6 +328,11 @@ update url msg model =
                 editing = Nothing
             } ! []
 
+        PrintPreview invoice ->
+            { model |
+                showModal = ( True, invoice |> Modal.Preview |> Just )
+            } ! []
+
         Print invoice ->
             model !
             [
@@ -312,7 +342,7 @@ update url msg model =
                         |> Task.attempt Printed
             ]
 
-        Printed ( Ok id ) ->
+        Printed ( Ok invoices ) ->
             model ! []
 
         Printed ( Err err ) ->
@@ -407,21 +437,24 @@ drawView model =
             Just invoice ->
                 invoice
     in
-        case model.action of
-            None ->
-                [ button [ onClick Add ] [ text "Add Invoice" ]
-                , Table.view config model.tableState model.invoices
-                ]
+    case model.action of
+        None ->
+            [ button [ onClick Add ] [ text "Add Invoice" ]
+            , Table.view config model.tableState model.invoices
+            , model.showModal
+                |> Modal.view
+                |> Html.map ModalMsg
+            ]
 
-            Adding ->
-                [ form [ onSubmit Post ]
-                    ( formFields model editable )
-                ]
+        Adding ->
+            [ form [ onSubmit Post ]
+                ( formFields model editable )
+            ]
 
-            Editing ->
-                [ form [ onSubmit Put ]
-                    ( formFields model editable )
-                ]
+        Editing ->
+            [ form [ onSubmit Put ]
+                ( formFields model editable )
+            ]
 
 
 formFields : Model -> Invoice -> List ( Html Msg )
@@ -434,12 +467,14 @@ formFields model invoice =
         []
     , div [] [
         label [] [ text "Date From" ]
-        , DatePicker.view model.startDate ( startSettings model.startDate ) model.startDatePicker
+        , model.startDatePicker
+            |> DatePicker.view model.startDate ( startSettings model.startDate )
             |> Html.map DatePickerStart
     ]
     , div [] [
         label [] [ text "Date To" ]
-        , DatePicker.view model.endDate ( endSettings model.endDate ) model.endDatePicker
+        , model.endDatePicker
+            |> DatePicker.view model.endDate ( endSettings model.endDate )
             |> Html.map DatePickerEnd
     ]
     , Form.text "URL"
@@ -484,10 +519,11 @@ config =
         , Table.stringColumn "Comment" .comment
         , Table.floatColumn "Rate" .rate
         , Table.floatColumn "Total Hours" .totalHours
-        , customColumn "" ( viewButton AddEntry "Add Entry" )
+--        , customColumn "" ( viewButton AddEntry "Add Entry" )
         , customColumn "" ( viewButton Edit "Edit" )
         , customColumn "" ( viewButton Delete "Delete" )
-        , customColumn "" ( viewButton Print "Print" )
+        , customColumn "" ( viewButton PrintPreview "Preview" )
+--        , customColumn "" ( viewButton Print "Print" )
         ]
     , customizations =
         { defaultCustomizations | rowAttrs = toRowAttrs }

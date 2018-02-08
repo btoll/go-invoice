@@ -9,7 +9,7 @@ CREATE TABLE `entry` (
   `date` date NOT NULL,
   `url` varchar(255) DEFAULT NULL,
   `comment` text,
-  `hours` decimal(2,2) NOT NULL,
+  `hours` FLOAT NOT NULL DEFAULT 0.0,
   PRIMARY KEY (`id`),
   KEY `ID` (`id`),
   KEY `invoice_id` (`invoice_id`),

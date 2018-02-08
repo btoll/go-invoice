@@ -83,18 +83,18 @@ setRoute maybeRoute model =
                 ( subModel, subMsg ) =
                     Entry.init model.build.url
             in
-                { model |
-                    page = Entry subModel
-                } ! [ Cmd.map EntryMsg subMsg ]
+            { model |
+                page = Entry subModel
+            } ! [ Cmd.map EntryMsg subMsg ]
 
         Just Route.Invoice ->
             let
                 ( subModel, subMsg ) =
                     Invoice.init model.build.url
             in
-                { model |
-                    page = Invoice subModel
-                } ! [ Cmd.map InvoiceMsg subMsg ]
+            { model |
+                page = Invoice subModel
+            } ! [ Cmd.map InvoiceMsg subMsg ]
 
         Nothing ->
             { model | page = Errored "404: Page not found." } ! []
@@ -108,21 +108,21 @@ update msg model =
                 ( newModel, newCmd ) =
                     subUpdate model.build.url subMsg subModel
             in
-                -- Mapping the newCmd to SpecialistMsg causes the Elm runtime to call `update` again with the subsequent newCmd!
-                { model | page = toModel newModel } ! [ Cmd.map toMsg newCmd ]
+            -- Mapping the newCmd to SpecialistMsg causes the Elm runtime to call `update` again with the subsequent newCmd!
+            { model | page = toModel newModel } ! [ Cmd.map toMsg newCmd ]
     in
-        case ( msg, model.page ) of
-            ( SetRoute route, _ ) ->
-                setRoute route model
+    case ( msg, model.page ) of
+        ( SetRoute route, _ ) ->
+            setRoute route model
 
-            ( EntryMsg subMsg, Entry subModel ) ->
-                toPage Entry EntryMsg Entry.update subMsg subModel
+        ( EntryMsg subMsg, Entry subModel ) ->
+            toPage Entry EntryMsg Entry.update subMsg subModel
 
-            ( InvoiceMsg subMsg, Invoice subModel ) ->
-                toPage Invoice InvoiceMsg Invoice.update subMsg subModel
+        ( InvoiceMsg subMsg, Invoice subModel ) ->
+            toPage Invoice InvoiceMsg Invoice.update subMsg subModel
 
-            _ ->
-                model ! []
+        _ ->
+            model ! []
 
 -- VIEW
 

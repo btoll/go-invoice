@@ -28,11 +28,8 @@ func Create(s SQL) (interface{}, error) {
 		return -1, err
 	}
 	rec, err := s.Create(db)
-	if err != nil {
-		return -1, err
-	}
 	cleanup(db)
-	return rec, nil
+	return rec, err
 }
 
 func Read(s SQL) (interface{}, error) {
@@ -41,11 +38,8 @@ func Read(s SQL) (interface{}, error) {
 		return nil, err
 	}
 	row, err := s.Read(db)
-	if err != nil {
-		return nil, err
-	}
 	cleanup(db)
-	return row, nil
+	return row, err
 }
 
 func Update(s SQL) error {
@@ -54,11 +48,8 @@ func Update(s SQL) error {
 		return err
 	}
 	err = s.Update(db)
-	if err != nil {
-		return err
-	}
 	cleanup(db)
-	return nil
+	return err
 }
 
 func Delete(s SQL) error {
@@ -68,7 +59,7 @@ func Delete(s SQL) error {
 	}
 	err = s.Delete(db)
 	cleanup(db)
-	return nil
+	return err
 }
 
 func List(s SQL) (interface{}, error) {
@@ -77,9 +68,6 @@ func List(s SQL) (interface{}, error) {
 		return nil, err
 	}
 	coll, err := s.List(db)
-	if err != nil {
-		return nil, err
-	}
 	cleanup(db)
-	return coll, nil
+	return coll, err
 }

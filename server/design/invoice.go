@@ -14,6 +14,7 @@ var _ = Resource("Invoice", func() {
 		Description("Create a new invoice.")
 		Payload(InvoicePayload)
 		Response(OK, InvoiceMedia)
+		Response(BadRequest, ErrorMedia)
 	})
 
 	Action("show", func() {
@@ -23,6 +24,7 @@ var _ = Resource("Invoice", func() {
 		})
 		Description("Get an invoice by id.")
 		Response(OK, InvoiceMedia)
+		Response(BadRequest, ErrorMedia)
 	})
 
 	Action("update", func() {
@@ -36,6 +38,7 @@ var _ = Resource("Invoice", func() {
 			Status(200)
 			Media(InvoiceMedia, "tiny")
 		})
+		Response(BadRequest, ErrorMedia)
 	})
 
 	Action("delete", func() {
@@ -48,12 +51,14 @@ var _ = Resource("Invoice", func() {
 			Status(200)
 			Media(InvoiceMedia, "tiny")
 		})
+		Response(BadRequest, ErrorMedia)
 	})
 
 	Action("list", func() {
 		Routing(GET("/list"))
 		Description("Get all invoices")
 		Response(OK, CollectionOf(InvoiceMedia))
+		Response(BadRequest, ErrorMedia)
 	})
 
 	Action("print", func() {
@@ -63,6 +68,7 @@ var _ = Resource("Invoice", func() {
 		})
 		Description("Print an invoice")
 		Response(OK, "application/json")
+		Response(BadRequest, ErrorMedia)
 	})
 })
 
@@ -71,38 +77,42 @@ var InvoicePayload = Type("InvoicePayload", func() {
 
 	Attribute("id", Integer, "ID", func() {
 		Metadata("struct:tag:datastore", "id,noindex")
-		Metadata("struct:tag:json", "id,omitempty")
+		Metadata("struct:tag:json", "id")
 	})
 	Attribute("title", String, "Invoice title", func() {
 		Metadata("struct:tag:datastore", "title,noindex")
-		Metadata("struct:tag:json", "title,omitempty")
+		Metadata("struct:tag:json", "title")
 	})
 	Attribute("dateFrom", String, "Invoice date from", func() {
 		Metadata("struct:tag:datastore", "dateFrom,noindex")
-		Metadata("struct:tag:json", "dateFrom,omitempty")
+		Metadata("struct:tag:json", "dateFrom")
 	})
 	Attribute("dateTo", String, "Invoice date to", func() {
 		Metadata("struct:tag:datastore", "dateTo,noindex")
-		Metadata("struct:tag:json", "dateTo,omitempty")
+		Metadata("struct:tag:json", "dateTo")
 	})
 	Attribute("url", String, "Invoice url", func() {
 		Metadata("struct:tag:datastore", "url,noindex")
-		Metadata("struct:tag:json", "url,omitempty")
+		Metadata("struct:tag:json", "url")
 	})
 	Attribute("comment", String, "Invoice comment", func() {
 		Metadata("struct:tag:datastore", "comment,noindex")
-		Metadata("struct:tag:json", "comment,omitempty")
+		Metadata("struct:tag:json", "comment")
 	})
 	Attribute("rate", Number, "Invoice rate", func() {
 		Metadata("struct:tag:datastore", "rate,noindex")
-		Metadata("struct:tag:json", "rate,omitempty")
+		Metadata("struct:tag:json", "rate")
 	})
 	Attribute("totalHours", Number, "Invoice total hours", func() {
-		Metadata("struct:tag:datastore", "totalHours,noindex")
+		Metadata("struct:tag:datastore", "totalHours")
 		// Note that the following statement is needed b/c the json response was returned with
 		// `TotalHours` in the payload which was not being correctly parsed into the client-side
 		// model b/c Elm was expecting it to be camel-case `totalHours`!
-		Metadata("struct:tag:json", "totalHours,omitempty")
+		Metadata("struct:tag:json", "totalHours")
+	})
+	Attribute("entries", Any, "Invoice entries", func() {
+		Metadata("struct:tag:datastore", "entries,noindex")
+		Metadata("struct:tag:json", "entries")
 	})
 
 	Required("title", "dateFrom", "dateTo", "url", "comment", "rate", "totalHours")
@@ -123,8 +133,9 @@ var InvoiceMedia = MediaType("application/invoiceapi.invoiceentity", func() {
 		Attribute("comment")
 		Attribute("rate")
 		Attribute("totalHours")
+		Attribute("entries", CollectionOf(EntryMedia))
 
-		Required("id", "title", "dateFrom", "dateTo", "url", "comment", "rate", "totalHours")
+		Required("id", "title", "dateFrom", "dateTo", "url", "comment", "rate", "totalHours", "entries")
 	})
 
 	View("default", func() {
@@ -136,6 +147,7 @@ var InvoiceMedia = MediaType("application/invoiceapi.invoiceentity", func() {
 		Attribute("comment")
 		Attribute("rate")
 		Attribute("totalHours")
+		Attribute("entries")
 	})
 
 	View("tiny", func() {

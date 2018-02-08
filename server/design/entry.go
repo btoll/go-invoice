@@ -65,28 +65,31 @@ var EntryPayload = Type("EntryPayload", func() {
 
 	Attribute("id", Integer, "ID", func() {
 		Metadata("struct:tag:datastore", "id,noindex")
-		Metadata("struct:tag:json", "id,omitempty")
+		Metadata("struct:tag:json", "id")
 	})
 	Attribute("invoice_id", Integer, "Invoice ID (foreign key)", func() {
 		Metadata("struct:tag:datastore", "invoice_id,noindex")
-		Metadata("struct:tag:json", "invoice_id,omitempty")
+		Metadata("struct:tag:json", "invoice_id")
 	})
 	Attribute("title", String, "Entry title", func() {
 		Metadata("struct:tag:datastore", "title,noindex")
+		Metadata("struct:tag:json", "title")
 	})
 	Attribute("date", String, "Entry date", func() {
 		Metadata("struct:tag:datastore", "date,noindex")
-		Metadata("struct:tag:json", "date,omitempty")
+		Metadata("struct:tag:json", "date")
 	})
 	Attribute("url", String, "Entry url", func() {
 		Metadata("struct:tag:datastore", "url,noindex")
+		Metadata("struct:tag:json", "url")
 	})
 	Attribute("comment", String, "Entry comment", func() {
 		Metadata("struct:tag:datastore", "comment,noindex")
+		Metadata("struct:tag:json", "comment")
 	})
 	Attribute("hours", Number, "Entry hours", func() {
 		Metadata("struct:tag:datastore", "hours,noindex")
-		Metadata("struct:tag:json", "hours,omitempty")
+		Metadata("struct:tag:json", "hours")
 	})
 
 	Required("invoice_id", "title", "date", "url", "comment", "hours")

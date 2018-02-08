@@ -42,10 +42,13 @@ post url invoice =
             |> Http.post ( (++) url "/invoice/" ) body
 
 
-print : String -> String -> Http.Request ( List Invoice )
+print : String -> String -> Http.Request Invoice
 print url invoice_id =
-    (++) "print/" invoice_id
-        |> get url
+    decoder
+        |> Http.get (
+            (++) "/invoice/print/" invoice_id
+                |> (++) url
+            )
 
 
 put : String -> Invoice -> Http.Request Int

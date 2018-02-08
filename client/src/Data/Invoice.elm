@@ -1,5 +1,6 @@
 module Data.Invoice exposing (Invoice, decoder, encoder, manyDecoder, new, succeed)
 
+import Data.Entry exposing (Entry)
 import Json.Decode as Decode exposing (Decoder, float, int, list, string)
 import Json.Decode.Pipeline exposing (decode, optional, required)
 import Json.Encode as Encode
@@ -15,6 +16,7 @@ type alias Invoice =
     , comment : String
     , rate : Float
     , totalHours : Float
+    , entries : List Entry
     }
 
 
@@ -28,6 +30,7 @@ new =
     , comment = ""
     , rate = 0.00
     , totalHours = 0.00
+    , entries = []
     }
 
 
@@ -42,6 +45,7 @@ decoder =
         |> optional "comment" string ""
         |> optional "rate" float 0.00
         |> optional "totalHours" float 0.00
+        |> optional "entries" ( Data.Entry.decoder |> Decode.list ) []
 
 
 manyDecoder : Decoder ( List Invoice )
@@ -58,8 +62,8 @@ encoder invoice =
         , ( "dateTo", Encode.string invoice.dateTo )
         , ( "url", Encode.string invoice.url )
         , ( "comment", Encode.string invoice.comment )
-        , ( "totalHours", Encode.float invoice.totalHours )
         , ( "rate", Encode.float invoice.rate )
+        , ( "totalHours", Encode.float invoice.totalHours )
         ]
 
 succeed : a -> Decoder a

@@ -9,8 +9,8 @@ CREATE TABLE `invoice` (
   `dateTo` date NOT NULL,
   `url` varchar(255) DEFAULT NULL,
   `comment` text,
-  `rate` FLOAT DEFAULT 0.00,
-  `totalHours` FLOAT DEFAULT 0.00,
+  `rate` FLOAT DEFAULT 0.0,
+  `totalHours` FLOAT DEFAULT 0.0,
   PRIMARY KEY (`id`),
   KEY `ID` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;

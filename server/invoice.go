@@ -24,7 +24,7 @@ func (c *InvoiceController) Create(ctx *app.CreateInvoiceContext) error {
 
 	res, err := sql.Create(sql.NewInvoice(ctx.Payload))
 	if err != nil {
-		return goa.ErrInternal(err, "endpoint", "create")
+		return ctx.BadRequest(goa.ErrInternal(err, "endpoint", "create"))
 	}
 	return ctx.OK(res.(*app.InvoiceMedia))
 
@@ -37,7 +37,10 @@ func (c *InvoiceController) Delete(ctx *app.DeleteInvoiceContext) error {
 
 	err := sql.Delete(sql.NewInvoice(ctx.ID))
 	if err != nil {
-		return goa.ErrInternal(err, "endpoint", "delete")
+		//		return ctx.BadRequest(goa.ErrInternal(err, "endpoint", "delete"))
+		//		err = ctx.BadRequest(goa.ErrInternal(err, "endpoint", "delete"))
+		//		return goa.ErrInternal(err, "endpoint", "delete")
+		return goa.ErrBadRequest(err, "endpoint", "delete")
 	}
 	return ctx.OKTiny(&app.InvoiceMediaTiny{ctx.ID})
 
@@ -50,7 +53,7 @@ func (c *InvoiceController) List(ctx *app.ListInvoiceContext) error {
 
 	collection, err := sql.List(sql.NewInvoice(nil))
 	if err != nil {
-		return goa.ErrInternal(err, "endpoint", "list")
+		return ctx.BadRequest(goa.ErrInternal(err, "endpoint", "list"))
 	}
 	return ctx.OK(collection.(app.InvoiceMediaCollection))
 
@@ -73,7 +76,7 @@ func (c *InvoiceController) Print(ctx *app.PrintInvoiceContext) error {
 	}
 	rec, err := sql.Read(sql.NewInvoice(ctx.ID))
 	if err != nil {
-		return goa.ErrInternal(err, "endpoint", "print")
+		return ctx.BadRequest(goa.ErrInternal(err, "endpoint", "print"))
 	}
 	entries, err := sql.List(sql.NewEntry(ctx.ID))
 	if err != nil {
@@ -95,7 +98,7 @@ func (c *InvoiceController) Print(ctx *app.PrintInvoiceContext) error {
 		Entries:    entries.(app.EntryMediaCollection),
 	})
 	if err != nil {
-		return goa.ErrInternal(err, "endpoint", "print")
+		return ctx.BadRequest(goa.ErrInternal(err, "endpoint", "print"))
 	}
 	return ctx.OK(b)
 

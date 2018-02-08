@@ -133,6 +133,10 @@ func (s *Invoice) List(db *mysql.DB) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
+		entries, err := List(NewEntry(id))
+		if err != nil {
+			return nil, err
+		}
 		coll[i] = &app.InvoiceMedia{
 			ID:         id,
 			Title:      title,
@@ -142,6 +146,7 @@ func (s *Invoice) List(db *mysql.DB) (interface{}, error) {
 			Comment:    comment,
 			Rate:       rate,
 			TotalHours: totalHours,
+			Entries:    entries.(app.EntryMediaCollection),
 		}
 		i++
 	}
