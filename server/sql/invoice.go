@@ -93,12 +93,14 @@ func (s *Invoice) Update(db *mysql.DB) error {
 }
 
 func (s *Invoice) Delete(db *mysql.DB) error {
+	// NOTE: B/c of the foreign key constraint and deletion cascade, deleting an invoice
+	// will automatically delete all of its entries.
 	stmt, err := db.Prepare(s.Stmt["DELETE"])
 	if err != nil {
 		return err
 	}
-	id := s.Data.(int)
-	_, err = stmt.Exec(&id)
+	invoiceId := s.Data.(int)
+	_, err = stmt.Exec(&invoiceId)
 	return err
 }
 

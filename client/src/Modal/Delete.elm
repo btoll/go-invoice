@@ -29,7 +29,7 @@ update msg fn =
 view : Invoice -> Html Msg
 view invoice =
     div [] [
-        p [] [ text "Are you sure you wish to delete?  This is irreversible!" ]
+        p [] [ text "Are you sure you wish to proceed?  This will also permanently delete all of the invoice's entries.  This is irreversible!" ]
         , button [ invoice |> Yes |> onClick ] [ text "Yes" ]
         , button [ onClick No ] [ text "No" ]
         ]

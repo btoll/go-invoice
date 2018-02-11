@@ -13,6 +13,6 @@ CREATE TABLE `entry` (
   PRIMARY KEY (`id`),
   KEY `ID` (`id`),
   KEY `invoice_id` (`invoice_id`),
-  CONSTRAINT `entry_ibfk_1` FOREIGN KEY (`invoice_id`) REFERENCES `invoice` (`id`)
+  CONSTRAINT `fkinvoice_id` FOREIGN KEY (`invoice_id`) REFERENCES `invoice` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
