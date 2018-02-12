@@ -13,6 +13,8 @@ import Table exposing (defaultCustomizations)
 import Task exposing (Task)
 import Time
 import Util.Date
+import Validate.Invoice
+import Views.Errors as Errors
 import Views.Form as Form
 import Views.Modal as Modal
 
@@ -22,7 +24,8 @@ import Views.Modal as Modal
 
 
 type alias Model =
-    { tableState : Table.State
+    { errors : List ( Validate.Invoice.Field, String )
+    , tableState : Table.State
     , action : Action
     , editing : Maybe Invoice
     , disabled : Bool
@@ -95,7 +98,8 @@ init url =
         ( endDatePicker, endDatePickerFx ) =
             DatePicker.init
     in
-    { tableState = Table.initialSort "ID"
+    { errors = []
+    , tableState = Table.initialSort "ID"
     , action = None
     , editing = Nothing
     , disabled = True
@@ -291,21 +295,34 @@ update url msg model =
 
         Post ->
             let
-                subCmd =
+                errors =
                     case model.editing of
                         Nothing ->
-                            Cmd.none
+                            []
 
                         Just invoice ->
-                            Request.Invoice.post url invoice
+                            Validate.Invoice.errors invoice
+
+                ( action, subCmd ) = if errors |> List.isEmpty then
+                    case model.editing of
+                        Nothing ->
+                            ( None, Cmd.none )
+
+                        Just invoice ->
+                            ( None
+                            , Request.Invoice.post url invoice
                                 |> Http.toTask
                                 |> Task.attempt Posted
+                            )
+                    else
+                        ( Adding, Cmd.none )
             in
-            { model |
-                action = None
-                , startDate = Nothing
-                , endDate = Nothing
-            } ! [ subCmd ]
+                { model |
+                    action = action
+                    , startDate = Nothing
+                    , endDate = Nothing
+                    , errors = errors
+                } ! [ subCmd ]
 
         Posted ( Ok invoice ) ->
             let
@@ -350,18 +367,32 @@ update url msg model =
 
         Put ->
             let
-                subCmd = case model.editing of
-                    Nothing ->
-                        Cmd.none
+                errors =
+                    case model.editing of
+                        Nothing ->
+                            []
 
-                    Just invoice ->
-                        Request.Invoice.put url invoice
-                            |> Http.toTask
-                            |> Task.attempt Putted
+                        Just invoice ->
+                            Validate.Invoice.errors invoice
+
+                ( action, subCmd ) = if errors |> List.isEmpty then
+                    case model.editing of
+                        Nothing ->
+                            ( None, Cmd.none )
+
+                        Just invoice ->
+                            ( None
+                            , Request.Invoice.put url invoice
+                                |> Http.toTask
+                                |> Task.attempt Putted
+                            )
+                    else
+                        ( Adding, Cmd.none )
             in
-            { model |
-                action = None
-            } ! [ subCmd ]
+                { model |
+                    action = action
+                    , errors = errors
+                } ! [ subCmd ]
 
         Putted ( Ok id ) ->
             let
@@ -420,8 +451,10 @@ update url msg model =
 view : Model -> Html Msg
 view model =
     section []
-        ( (::)
-            ( h1 [] [ text "Invoices" ] )
+        ( (++)
+            [ h1 [] [ text "Invoices" ]
+            , Errors.view model.errors
+            ]
             ( drawView model )
         )
 

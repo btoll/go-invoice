@@ -19,7 +19,7 @@ func cleanup(db *mysql.DB) error {
 }
 
 func connect() (*mysql.DB, error) {
-	return mysql.Open("mysql", ":@/?charset=utf8")
+	return mysql.Open("mysql", "root:aa892sbr@/invoices?charset=utf8")
 }
 
 func Create(s SQL) (interface{}, error) {

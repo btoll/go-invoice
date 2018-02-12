@@ -15,6 +15,8 @@ import Table exposing (defaultCustomizations)
 import Task exposing (Task)
 import Time
 import Util.Date
+import Validate.Entry
+import Views.Errors as Errors
 import Views.Form as Form
 
 
@@ -23,7 +25,8 @@ import Views.Form as Form
 
 
 type alias Model =
-    { tableState : Table.State
+    { errors : List ( Validate.Entry.Field, String )
+    , tableState : Table.State
     , action : Action
     , editing : Maybe Entry
     , disabled : Bool
@@ -71,7 +74,8 @@ init url =
         ( datePicker, datePickerFx ) =
             DatePicker.init
     in
-        { tableState = Table.initialSort "ID"
+        { errors = []
+        , tableState = Table.initialSort "ID"
         , action = None
         , editing = Nothing
         , disabled = True
@@ -228,20 +232,34 @@ update url msg model =
 
         Post ->
             let
-                subCmd = case model.editing of
-                    Nothing ->
-                        Cmd.none
+                errors =
+                    case model.editing of
+                        Nothing ->
+                            []
 
-                    Just entry ->
-                        { entry | invoice_id = model.selectedInvoiceID }
-                        |> Request.Entry.post url
-                            |> Http.toTask
-                            |> Task.attempt Posted
+                        Just invoice ->
+                            Validate.Entry.errors invoice
+
+                ( action, subCmd ) = if errors |> List.isEmpty then
+                    case model.editing of
+                        Nothing ->
+                            ( Selected, Cmd.none )
+
+                        Just entry ->
+                            ( Selected
+                            , { entry | invoice_id = model.selectedInvoiceID }
+                                |> Request.Entry.post url
+                                |> Http.toTask
+                                |> Task.attempt Posted
+                            )
+                    else
+                        ( Adding, Cmd.none )
             in
-            { model |
-                action = Selected
-                , date = Nothing
-            } ! [ subCmd ]
+                { model |
+                    action = action
+                    , date = Nothing
+                    , errors = errors
+                } ! [ subCmd ]
 
         Posted ( Ok entry ) ->
             let
@@ -266,18 +284,32 @@ update url msg model =
 
         Put ->
             let
-                subCmd = case model.editing of
-                    Nothing ->
-                        Cmd.none
+                errors =
+                    case model.editing of
+                        Nothing ->
+                            []
 
-                    Just entry ->
-                        Request.Entry.put url entry
-                            |> Http.toTask
-                            |> Task.attempt Putted
+                        Just invoice ->
+                            Validate.Entry.errors invoice
+
+                ( action, subCmd ) = if errors |> List.isEmpty then
+                    case model.editing of
+                        Nothing ->
+                            ( Selected, Cmd.none )
+
+                        Just entry ->
+                            ( Selected
+                            , Request.Entry.put url entry
+                                |> Http.toTask
+                                |> Task.attempt Putted
+                            )
+                    else
+                        ( Adding, Cmd.none )
             in
-            { model |
-                action = Selected
-            } ! [ subCmd ]
+                { model |
+                    action = action
+                    , errors = errors
+                } ! [ subCmd ]
 
         Putted ( Ok id ) ->
             let
@@ -336,8 +368,10 @@ update url msg model =
 view : Model -> Html Msg
 view model =
     section []
-        ( (::)
-            ( h1 [] [ text "Entries" ] )
+        ( (++)
+            [ h1 [] [ text "Entries" ]
+            , Errors.view model.errors
+            ]
             ( drawView model )
         )
 
