@@ -18,9 +18,9 @@ func NewInvoice(payload interface{}) *Invoice {
 		Stmt: map[string]string{
 			"DELETE":  "DELETE FROM invoice WHERE id=?",
 			"GET_ONE": "SELECT * FROM invoice WHERE id=%d",
-			"INSERT":  "INSERT invoice SET dateFrom=?,dateTo=?,title=?,url=?,comment=?,rate=?,totalHours=?",
+			"INSERT":  "INSERT invoice SET company_id=?dateFrom=?,dateTo=?,title=?,url=?,comment=?,rate=?,totalHours=?",
 			"SELECT":  "SELECT %s FROM invoice",
-			"UPDATE":  "UPDATE invoice SET dateFrom=?,dateTo=?,title=?,url=?,comment=?,rate=?,totalHours=? WHERE id=?",
+			"UPDATE":  "UPDATE invoice SET comapny_id=?,dateTo=?,title=?,url=?,comment=?,rate=?,totalHours=? WHERE id=?",
 		},
 	}
 }
@@ -31,7 +31,7 @@ func (s *Invoice) Create(db *mysql.DB) (interface{}, error) {
 	if err != nil {
 		return -1, err
 	}
-	res, err := stmt.Exec(payload.DateFrom, payload.DateTo, payload.Title, payload.URL, payload.Comment, payload.Rate, payload.TotalHours)
+	res, err := stmt.Exec(payload.CompanyID, payload.DateFrom, payload.DateTo, payload.Title, payload.URL, payload.Comment, payload.Rate, payload.TotalHours)
 	if err != nil {
 		return -1, err
 	}
@@ -41,6 +41,7 @@ func (s *Invoice) Create(db *mysql.DB) (interface{}, error) {
 	}
 	return &app.InvoiceMedia{
 		ID:         int(id),
+		CompanyID:  int(payload.CompanyID),
 		DateFrom:   payload.DateFrom,
 		DateTo:     payload.DateTo,
 		Title:      payload.Title,
@@ -59,6 +60,7 @@ func (s *Invoice) Read(db *mysql.DB) (interface{}, error) {
 	row := &app.InvoiceMedia{}
 	for rows.Next() {
 		var id int
+		var company_id int
 		var title string
 		var dateFrom string
 		var dateTo string
@@ -66,11 +68,12 @@ func (s *Invoice) Read(db *mysql.DB) (interface{}, error) {
 		var comment string
 		var rate float64
 		var totalHours float64
-		err = rows.Scan(&id, &title, &dateFrom, &dateTo, &url, &comment, &rate, &totalHours)
+		err = rows.Scan(&id, &company_id, &title, &dateFrom, &dateTo, &url, &comment, &rate, &totalHours)
 		if err != nil {
 			return nil, err
 		}
 		row.ID = id
+		row.CompanyID = company_id
 		row.Title = title
 		row.DateFrom = dateFrom
 		row.DateTo = dateTo
@@ -88,7 +91,7 @@ func (s *Invoice) Update(db *mysql.DB) error {
 	if err != nil {
 		return err
 	}
-	_, err = stmt.Exec(payload.DateFrom, payload.DateTo, payload.Title, payload.URL, payload.Comment, payload.Rate, payload.TotalHours, payload.ID)
+	_, err = stmt.Exec(payload.CompanyID, payload.DateFrom, payload.DateTo, payload.Title, payload.URL, payload.Comment, payload.Rate, payload.TotalHours, payload.ID)
 	return err
 }
 
@@ -123,6 +126,7 @@ func (s *Invoice) List(db *mysql.DB) (interface{}, error) {
 	i := 0
 	for rows.Next() {
 		var id int
+		var company_id int
 		var title string
 		var dateFrom string
 		var dateTo string
@@ -130,7 +134,7 @@ func (s *Invoice) List(db *mysql.DB) (interface{}, error) {
 		var comment string
 		var rate float64
 		var totalHours float64
-		err = rows.Scan(&id, &title, &dateFrom, &dateTo, &url, &comment, &rate, &totalHours)
+		err = rows.Scan(&id, &company_id, &title, &dateFrom, &dateTo, &url, &comment, &rate, &totalHours)
 		if err != nil {
 			return nil, err
 		}
@@ -140,6 +144,7 @@ func (s *Invoice) List(db *mysql.DB) (interface{}, error) {
 		}
 		coll[i] = &app.InvoiceMedia{
 			ID:         id,
+			CompanyID:  company_id,
 			Title:      title,
 			DateFrom:   dateFrom,
 			DateTo:     dateTo,
