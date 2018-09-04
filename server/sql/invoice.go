@@ -20,7 +20,7 @@ func NewInvoice(payload interface{}) *Invoice {
 			"GET_ONE": "SELECT * FROM invoice WHERE id=%d",
 			"INSERT":  "INSERT invoice SET company_id=?dateFrom=?,dateTo=?,title=?,url=?,comment=?,rate=?,totalHours=?",
 			"SELECT":  "SELECT %s FROM invoice",
-			"UPDATE":  "UPDATE invoice SET comapny_id=?,dateTo=?,title=?,url=?,comment=?,rate=?,totalHours=? WHERE id=?",
+			"UPDATE":  "UPDATE invoice SET company_id=?,dateTo=?,title=?,url=?,comment=?,rate=?,totalHours=? WHERE id=?",
 		},
 	}
 }

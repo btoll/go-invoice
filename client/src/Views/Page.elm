@@ -8,6 +8,7 @@ import Route exposing (Route)
 type ActivePage
     = Other
     | Home
+    | Company
     | Invoice
     | Entry
 
@@ -22,6 +23,7 @@ type alias SiteLink msg =
 siteLinks : ActivePage -> List ( SiteLink a )
 siteLinks page =
     [ SiteLink Home Route.Home [ text "Home" ]
+    , SiteLink Company Route.Company [ text "Companies" ]
     , SiteLink Invoice Route.Invoice [ text "Invoices" ]
     , SiteLink Entry Route.Entry [ text "Entries" ]
     ]

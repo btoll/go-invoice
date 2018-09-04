@@ -18,6 +18,15 @@ delete url invoice =
         }
 
 
+export : String -> String -> Http.Request Invoice
+export url invoice_id =
+    decoder
+        |> Http.get (
+            (++) "/invoice/export/" invoice_id
+                |> (++) url
+            )
+
+
 get : String -> String -> Http.Request ( List Invoice )
 get url method =
     manyDecoder
@@ -40,15 +49,6 @@ post url invoice =
     in
         decoder
             |> Http.post ( (++) url "/invoice/" ) body
-
-
-export : String -> String -> Http.Request Invoice
-export url invoice_id =
-    decoder
-        |> Http.get (
-            (++) "/invoice/export/" invoice_id
-                |> (++) url
-            )
 
 
 put : String -> Invoice -> Http.Request Int

@@ -4,6 +4,7 @@ import Data.Invoice exposing (Invoice)
 import Html exposing (Html, text)
 import Http
 import Navigation
+import Page.Company as Company
 import Page.Entry as Entry
 import Page.Invoice as Invoice
 import Page.NotFound as NotFound
@@ -27,6 +28,7 @@ type alias Flags =
 
 type Page
     = Blank
+    | Company Company.Model
     | Entry Entry.Model
     | Errored String
     | Invoice Invoice.Model
@@ -68,6 +70,7 @@ initialPage =
 
 type Msg
     = SetRoute ( Maybe Route )
+    | CompanyMsg Company.Msg
     | EntryMsg Entry.Msg
     | InvoiceMsg Invoice.Msg
 
@@ -77,6 +80,15 @@ setRoute maybeRoute model =
     case maybeRoute of
         Just Route.Home ->
             { model | page = Blank } ! []
+
+        Just Route.Company ->
+            let
+                ( subModel, subMsg ) =
+                    Company.init model.build.url
+            in
+            { model |
+                page = Company subModel
+            } ! [ Cmd.map CompanyMsg subMsg ]
 
         Just Route.Entry ->
             let
@@ -139,6 +151,11 @@ view model =
             -- data via HTTP. We could also render a spinner here.
             text ""
                 |> frame Page.Home
+
+        Company subModel ->
+            Company.view subModel
+                |> frame Page.Company
+                |> Html.map CompanyMsg
 
         Entry subModel ->
             Entry.view subModel

@@ -80,11 +80,11 @@ func (c *InvoiceController) Export(ctx *app.ExportInvoiceContext) error {
 		ID:          row.ID,
 		Title:       row.Title,
 		CurrentDate: current_time.Format("01/02/2006"),
+		TotalHours:  row.TotalHours,
 		Amount:      row.Rate * row.TotalHours,
 		DateFrom:    row.DateFrom,
 		DateTo:      row.DateTo,
 		Rate:        row.Rate,
-		TotalHours:  row.TotalHours,
 		Entries:     entries.(app.EntryMediaCollection),
 	}
 	f, err := os.Create("invoices/foo.html")

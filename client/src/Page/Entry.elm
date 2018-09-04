@@ -469,7 +469,7 @@ formFields model entry =
         , onInput ( SetFormValue ( \v -> { entry | comment = v } ) )
         ]
         []
-    , Form.float "Total Hours"
+    , Form.float "Hours"
         [ value ( toString entry.hours )
         , onInput ( SetFormValue ( \v -> { entry | hours = Form.toFloat v } ) )
         ]
@@ -493,7 +493,7 @@ config =
         , Table.stringColumn "Date" .date
         , Table.stringColumn "URL" .url
         , Table.stringColumn "Comment" .comment
-        , Table.floatColumn "Total Hours" .hours
+        , Table.floatColumn "Hours" .hours
         , customColumn "" ( viewButton Edit "Edit" )
         , customColumn "" ( viewButton Delete "Delete" )
         ]

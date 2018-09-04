@@ -122,7 +122,6 @@ init url =
 
 type Msg
     = Add
-    | AddEntry Invoice
     | Cancel
     | DatePickerEnd DatePicker.Msg
     | DatePickerStart DatePicker.Msg
@@ -151,9 +150,6 @@ update url msg model =
                 action = Adding
                 , editing = Nothing
             } ! []
-
-        AddEntry invoice ->
-            model ! []
 
         Cancel ->
             { model |
@@ -522,7 +518,7 @@ drawView model =
 
 formFields : Model -> Invoice -> List ( Html Msg )
 formFields model invoice =
-    [ Form.text"Title"
+    [ Form.text "Title"
         [ value invoice.title
         , onInput ( SetFormValue ( \v -> { invoice | title = v } ) )
         , autofocus True
@@ -582,7 +578,6 @@ config =
         , Table.stringColumn "Comment" .comment
         , Table.floatColumn "Rate" .rate
         , Table.floatColumn "Total Hours" .totalHours
---        , customColumn "" ( viewButton AddEntry "Add Entry" )
         , customColumn "" ( viewButton Edit "Edit" )
         , customColumn "" ( viewButton Delete "Delete" )
         , customColumn "" ( viewButton PrintPreview "Print Preview" )

@@ -19,7 +19,7 @@ CREATE TABLE `invoice` (
 
 LOCK TABLES `invoice` WRITE;
 /*!40000 ALTER TABLE `invoice` DISABLE KEYS */;
-INSERT INTO `invoice` VALUES (1,1,'Elm Front End','2018-09-03','2018-09-10','http://ben','Finished Elm front end.',75,31.25);
+INSERT INTO `invoice` VALUES (1,1,'Ramp Up and First Task','2018-08-20','2018-08-31','','',75,17);
 /*!40000 ALTER TABLE `invoice` ENABLE KEYS */;
 UNLOCK TABLES;
 

@@ -31,6 +31,7 @@ nav li a {
 }
 /* Highlight the link of the current page. */
 #home nav li a[href$="/"],
+#company nav li a[href$="company"],
 #entry nav li a[href$="entry"],
 #invoice nav li a[href$="invoice"] {
     background: #265a88;

@@ -4,39 +4,46 @@
 <meta charset="utf-8">
 <title></title>
 <style>
+.bold {
+    font-weight: bold;
+}
 body {
     margin: 50px;
     padding: 20px;
 }
-#header h4 {
+.box {
+    border-radius: 10px;
+    margin-bottom: 20px;
+    padding: 10px;
+    width: 280px;;
+}
+.box h4 {
     margin: 0;
 }
-#header p {
+.box p {
     margin: 5px 0;
     padding: 0;
 }
-#from {
-    float: left;
-}
-#invoiceInfo {
-    float: left;
-    margin-left: 500px;
-}
-#invoiceInfo span {
+.box span {
     font-weight: bold;
 }
-#billTo {
-    clear: left;
-    padding-top: 20px;
+#invoiceInfo {
+    background-color: #ccc;
+}
+#from {
+    background-color: antiquewhite;
+}
+#to {
+    background-color: #b3e6cc;
 }
 #entries {
-    margin-top: 50px;
+    margin-top: 30px;
 }
 #entries li {
     margin: 20px 0;
 }
 #footer {
-    padding-top: 20px;
+    margin-top: 30px;
 }
 #footer p {
     font-weight: bold;
@@ -48,20 +55,21 @@ body {
 
 <body>
     <div id="header">
-        <div id="from">
+        <div id="invoiceInfo" class="box">
+            <p><span>Invoice Number:</span> </p>
+            <p><span>Invoice Date:</span> {{ .CurrentDate }}</p>
+            <p><span>Invoice Hours:</span> {{ .TotalHours }}</p>
+            <p><span>Invoice Amount:</span> ${{ .Amount }}</p>
+        </div>
+
+        <div id="from" class="box">
             <h4>From:</h4>
             <p>Benjamin Toll</p>
             <p>113 Old Colony Road</p>
             <p>Princeton, MA 01541</p>
         </div>
 
-        <div id="invoiceInfo">
-            <p><span>Invoice Number:</span> </p>
-            <p><span>Invoice Date:</span> {{ .CurrentDate }}</p>
-            <p><span>Invoice Amount:</span> ${{ .Amount }}</p>
-        </div>
-
-        <div id="billTo">
+        <div id="to" class="box">
             <h4>Bill To:</h4>
             <p>Benjamin Toll</p>
             <p>113 Old Colony Road</p>
@@ -71,23 +79,23 @@ body {
 
     <div id="entries">
         <h4>Work Description:</h4>
-	<ul>
-      	{{ with .Entries }}
-		{{ range . }}
-			<li>
-				<span>{{ .Date }}, {{ .Hours }} hours {{ if .URL }} ({{ .URL }}) {{ end }}</span>
-				<table>
-					<tr>
-						<td>{{ .Title }}</td>
-					</tr>
-					<tr>
-						<td>{{ .Comment }}</td>
-					</tr>
-				</table>
-			</li>
-		{{ end }}
-      	{{ end }}
-	</ul>
+        <ul>
+            {{ with .Entries }}
+            {{ range . }}
+                <li>
+                    <span>{{ .Date }}, {{ .Hours }} hours {{ if .URL }} ({{ .URL }}) {{ end }}</span>
+                    <table>
+                        <tr>
+                            <td class="bold">{{ .Title }}</td>
+                        </tr>
+                        <tr>
+                            <td>{{ .Comment }}</td>
+                        </tr>
+                    </table>
+                </li>
+            {{ end }}
+            {{ end }}
+        </ul>
     </div>
 
     <div id="footer">

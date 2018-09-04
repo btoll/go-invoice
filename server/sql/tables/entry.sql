@@ -18,7 +18,13 @@ CREATE TABLE `entry` (
 
 LOCK TABLES `entry` WRITE;
 /*!40000 ALTER TABLE `entry` DISABLE KEYS */;
-INSERT INTO `entry` VALUES (NULL,1,'Elm work','2018-09-04','github://1','Easy peasy',5.75),(NULL,1,'HTML work','2018-09-06','github://2','Lemon squeezy',8),(NULL,1,'CSS work','2018-09-09','github://3','Yeah!',11.5);
+INSERT INTO `entry` VALUES (1,1,'React research','2018-08-21','','',2),
+	(2,1,'React research','2018-08-22','','',2),
+	(3,1,'React research and phone call','2018-08-23','','Spoke with Robert about the project for approximately 20 minutes.',3),
+	(4,1,'React research and project phone call','2018-08-27','','Did a quick sync-up with Frank, and let him know that I was waiting on information from Robert.',4),
+	(5,1,'Phone call with Robert','2018-08-28','','Productive call with Robert that allowed me to move forward.',.5),
+	(6,1,'Express framework for routing, phone calls and simplifying codebase','2018-08-30','','Brought in the Express web framework (Node.js) to mock the REST calls.  Spoke with Frank about the project for an hour and then Steve for about 15 minutes.\n\nGreatly simplified the existing app, it\'s already too overly-engineered.',4),
+	(7,1,'Finished mocking REST calls','2018-08-31','','With the new json blob from Steve, finished the GET and POST calls and tested that the percentage drop-down and input box were working.',1.5);
 /*!40000 ALTER TABLE `entry` ENABLE KEYS */;
 UNLOCK TABLES;
 
