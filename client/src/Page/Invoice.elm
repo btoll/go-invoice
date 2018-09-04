@@ -136,8 +136,6 @@ type Msg
     | Post
     | Posted ( Result Http.Error Invoice )
     | PrintPreview Invoice
-    | Print Invoice
-    | Printed ( Result Http.Error Invoice )
     | Put
     | Putted ( Result Http.Error Int )
     | SetFormValue ( String -> Invoice ) String
@@ -255,9 +253,6 @@ update url msg model =
             } ! []
 
         Deleted ( Err err ) ->
-            let
-                e = (Debug.log "err" err)
-            in
             model ! []
 
         Edit invoice ->
@@ -272,7 +267,7 @@ update url msg model =
             model !
             [
                 invoice.id |> toString
-                    |> Request.Invoice.print url
+                    |> Request.Invoice.export url
                         |> Http.toTask
                         |> Task.attempt Exported
             ]
@@ -304,6 +299,7 @@ update url msg model =
 
                 ( showModal, editing, cmd ) =
                     case ( subMsg |> Modal.update, pattern ) of
+                        -- Delete
                         ( True, Modal.Delete Nothing ) ->
                             ( False
                             , Nothing
@@ -313,10 +309,22 @@ update url msg model =
                                 |> Task.attempt Deleted
                             )
 
-                        ( True, Modal.Preview ( Just invoice ) ) ->
+                        -- PrintPreview, Close
+                        ( False, Modal.Preview ( Just invoice ) ) ->
                             ( False
                             , Nothing
                             , Cmd.none
+                            )
+
+                        -- PrintPreview, Print
+                        ( True, Modal.Preview ( Just invoice ) ) ->
+                            ( False
+                            , Nothing
+                            , Maybe.withDefault new model.editing
+                                |> .id |> toString
+                                |> Request.Invoice.export url
+                                    |> Http.toTask
+                                    |> Task.attempt Exported
                             )
 
                         ( _, _ ) ->
@@ -383,23 +391,9 @@ update url msg model =
 
         PrintPreview invoice ->
             { model |
-                showModal = ( True, invoice |> Just |> Modal.Preview |> Just )
+                editing = invoice |> Just
+                , showModal = ( True, invoice |> Just |> Modal.Preview |> Just )
             } ! []
-
-        Print invoice ->
-            model !
-            [
-                invoice.id |> toString
-                    |> Request.Invoice.print url
-                        |> Http.toTask
-                        |> Task.attempt Printed
-            ]
-
-        Printed ( Ok invoices ) ->
-            model ! []
-
-        Printed ( Err err ) ->
-            model ! []
 
         Put ->
             let
@@ -591,7 +585,7 @@ config =
 --        , customColumn "" ( viewButton AddEntry "Add Entry" )
         , customColumn "" ( viewButton Edit "Edit" )
         , customColumn "" ( viewButton Delete "Delete" )
-        , customColumn "" ( viewButton PrintPreview "Preview" )
+        , customColumn "" ( viewButton PrintPreview "Print Preview" )
         , customColumn "" ( viewButton Export "Export" )
         ]
     , customizations =

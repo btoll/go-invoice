@@ -15,3 +15,9 @@ CREATE TABLE `invoice` (
   KEY `ID` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
 
+LOCK TABLES `invoice` WRITE;
+/*!40000 ALTER TABLE `invoice` DISABLE KEYS */;
+INSERT INTO `invoice` VALUES (1,'Elm Front End','2018-09-03','2018-09-10','http://ben','Finished Elm front end.',75,31.25);
+/*!40000 ALTER TABLE `invoice` ENABLE KEYS */;
+UNLOCK TABLES;
+

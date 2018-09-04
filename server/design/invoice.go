@@ -61,13 +61,16 @@ var _ = Resource("Invoice", func() {
 		Response(BadRequest, ErrorMedia)
 	})
 
-	Action("print", func() {
-		Routing(GET("/print/:id"))
+	Action("export", func() {
+		Routing(GET("/export/:id"))
 		Params(func() {
 			Param("id", Integer, "Invoice ID")
 		})
-		Description("Print an invoice")
-		Response(OK, "application/json")
+		Description("Export an invoice")
+		Response(OK, func() {
+			Status(200)
+			Media(InvoiceMedia, "tiny")
+		})
 		Response(BadRequest, ErrorMedia)
 	})
 })
@@ -151,7 +154,6 @@ var InvoiceMedia = MediaType("application/invoiceapi.invoiceentity", func() {
 	})
 
 	View("tiny", func() {
-		Description("`tiny` is the view used to create new invoices.")
 		Attribute("id")
 	})
 })

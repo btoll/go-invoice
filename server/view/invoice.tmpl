@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title></title>
+<style>
+body {
+    margin: 50px;
+    padding: 20px;
+}
+#header h4 {
+    margin: 0;
+}
+#header p {
+    margin: 5px 0;
+    padding: 0;
+}
+#from {
+    float: left;
+}
+#invoiceInfo {
+    float: left;
+    margin-left: 500px;
+}
+#invoiceInfo span {
+    font-weight: bold;
+}
+#billTo {
+    clear: left;
+    padding-top: 20px;
+}
+#entries{
+    margin-top: 50px;
+}
+</style>
+</head>
+
+<body>
+    <div id="header">
+        <div id="from">
+            <h4>From:</h4>
+            <p>Benjamin Toll</p>
+            <p>113 Old Colony Road</p>
+            <p>Princeton, MA 01541</p>
+        </div>
+
+        <div id="invoiceInfo">
+            <p><span>Invoice Number:</span> </p>
+            <p><span>Invoice Date:</span> </p>
+            <p><span>Invoice Amount:</span> </p>
+        </div>
+
+        <div id="billTo">
+            <h4>Bill To:</h4>
+            <p>Benjamin Toll</p>
+            <p>113 Old Colony Road</p>
+            <p>Princeton, MA 01541</p>
+        </div>
+    </div>
+
+    <div id="entries">
+        <h4>Work Description:</h4>
+      	{{ with .Entries }}
+	{{ range . }}
+                <p>{{ .Title }}</p>
+                <p>{{ .URL }}</p>
+			{{ end }}
+      	{{ end }}
+    </div>
+
+    <div id="footer">
+        <p>Please pay upon receipt.</p>
+        <p>Thank you!</p>
+    </div>
+</body>
+</html>
+

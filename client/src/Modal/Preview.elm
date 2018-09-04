@@ -9,7 +9,7 @@ import Html.Events exposing (onClick)
 
 type Msg
     = Close
-    | Print
+    | Export
 
 
 
@@ -42,9 +42,9 @@ update : Msg -> Bool
 update msg =
     case msg of
         Close ->
-            True
+            False
 
-        Print ->
+        Export ->
             True
 
 
@@ -58,7 +58,7 @@ view invoice =
             , ul []
                 ( invoice.entries |> List.map entryItem )
         ]
-        , button [ onClick Print ] [ text "Print" ]
+        , button [ onClick Export ] [ text "Export" ]
         , button [ onClick Close ] [ text "Close" ]
         ]
 
