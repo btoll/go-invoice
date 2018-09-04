@@ -18,6 +18,7 @@ import Util.Date
 import Validate.Entry
 import Views.Errors as Errors
 import Views.Form as Form
+import Views.Modal as Modal
 
 
 
@@ -37,6 +38,8 @@ type alias Model =
 
     , date : Maybe Date
     , datePicker : DatePicker.DatePicker
+
+    , showModal : ( Bool, Maybe Modal.Modal )
     }
 
 
@@ -86,6 +89,7 @@ init url =
 
         , date = Nothing
         , datePicker = datePicker
+        , showModal = ( False, Nothing )
         } ! [ Cmd.map DatePicker datePickerFx
             , Request.Invoice.list url |> Http.send FetchedInvoice
             ]
@@ -104,6 +108,7 @@ type Msg
     | FetchedEntry ( Result Http.Error ( List Entry ) )
     | FetchedInvoice ( Result Http.Error ( List Invoice ) )
     | InvoiceSelected String
+    | ModalMsg Modal.Msg
     | Post
     | Posted ( Result Http.Error Entry )
     | Put
@@ -166,17 +171,10 @@ update url msg model =
             } ! [ Cmd.map DatePicker datePickerFx ]
 
         Delete entry ->
-            let
-                subCmd =
-                    Request.Entry.delete url entry
-                        |> Http.toTask
-                        |> Task.attempt Deleted
-            in
             { model |
-                action = Selected
-                , editing = Nothing
-                , date = Nothing
-            } ! [ subCmd ]
+                editing = entry |> Just
+                , showModal = ( True, Modal.Delete |> Just )
+            } ! []
 
         Deleted ( Ok deletedEntry ) ->
             { model |
@@ -229,6 +227,26 @@ update url msg model =
                     |> Request.Entry.get url
                     |> Http.send FetchedEntry
                 ]
+
+        ModalMsg subMsg ->
+            let
+                ( showModal, editing, cmd ) =
+                    case subMsg |> Modal.update of
+                        False ->
+                            ( False, Nothing, Cmd.none )
+
+                        True ->
+                            ( True
+                            , Nothing
+                            , Maybe.withDefault new model.editing
+                                |> Request.Entry.delete url
+                                |> Http.toTask
+                                |> Task.attempt Deleted
+                            )
+            in
+            { model |
+                showModal = ( showModal, Nothing )
+            } ! [ cmd ]
 
         Post ->
             let
@@ -400,11 +418,11 @@ drawView model =
                 , onInput InvoiceSelected
                 ]
                 ( model.invoices |> options )
-
     in
         case model.action of
             None ->
-                [ selectInvoice ]
+                [ selectInvoice
+                ]
 
             Adding ->
                 [ selectInvoice
@@ -422,6 +440,9 @@ drawView model =
                 [ selectInvoice
                 , button [ onClick Add ] [ text "Add Entry" ]
                 , Table.view config model.tableState model.entries
+                , model.showModal
+                    |> Modal.view
+                    |> Html.map ModalMsg
                 ]
 
 

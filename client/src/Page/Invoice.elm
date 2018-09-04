@@ -124,16 +124,18 @@ type Msg
     = Add
     | AddEntry Invoice
     | Cancel
-    | ModalMsg Modal.Msg
     | DatePickerEnd DatePicker.Msg
     | DatePickerStart DatePicker.Msg
     | Delete Invoice
     | Deleted ( Result Http.Error Invoice )
     | Edit Invoice
+    | Export Invoice
+    | Exported ( Result Http.Error Invoice )
     | FetchedInvoice ( Result Http.Error ( List Invoice ) )
+--    | ModalMsg Modal.Msg
     | Post
     | Posted ( Result Http.Error Invoice )
-    | PrintPreview Invoice
+--    | PrintPreview
     | Print Invoice
     | Printed ( Result Http.Error Invoice )
     | Put
@@ -162,19 +164,6 @@ update url msg model =
                 , startDate = Nothing
                 , endDate = Nothing
             } ! []
-
-        ModalMsg subMsg ->
-            let
-                ( bool, cmd ) =
-                    ( \invoice ->
-                        Request.Invoice.delete url invoice
-                            |> Http.toTask
-                            |> Task.attempt Deleted
-                    ) |> Modal.update subMsg
-            in
-            { model |
-                showModal = ( bool, Nothing )
-            } ! [ cmd ]
 
         DatePickerEnd subMsg ->
             let
@@ -254,7 +243,8 @@ update url msg model =
             { model |
                 showModal =
                     ( True
-                    , invoice |> Modal.Delete |> Just
+--                    , invoice |> Modal.Delete |> Just
+                    , Nothing
                     )
             } ! []
 
@@ -281,6 +271,21 @@ update url msg model =
                 , endDate = invoice.dateTo |> Util.Date.unsafeFromString |> Just
             } ! []
 
+        Export invoice ->
+            model !
+            [
+                invoice.id |> toString
+                    |> Request.Invoice.print url
+                        |> Http.toTask
+                        |> Task.attempt Exported
+            ]
+
+        Exported ( Ok invoices ) ->
+            model ! []
+
+        Exported ( Err err ) ->
+            model ! []
+
         FetchedInvoice ( Ok invoices ) ->
             { model |
                 invoices = invoices
@@ -292,6 +297,19 @@ update url msg model =
                 invoices = []
                 , tableState = Table.initialSort "ID"
             } ! []
+
+--        ModalMsg subMsg ->
+--            let
+--                ( bool, cmd ) =
+--                    ( \invoice ->
+--                        Request.Invoice.delete url invoice
+--                            |> Http.toTask
+--                            |> Task.attempt Deleted
+--                    ) |> Modal.update subMsg
+--            in
+--            { model |
+--                showModal = ( bool, Nothing )
+--            } ! [ cmd ]
 
         Post ->
             let
@@ -345,10 +363,10 @@ update url msg model =
                 editing = Nothing
             } ! []
 
-        PrintPreview invoice ->
-            { model |
-                showModal = ( True, invoice |> Modal.Preview |> Just )
-            } ! []
+--        PrintPreview invoice ->
+--            { model |
+--                showModal = ( True, Modal.Preview |> Just )
+--            } ! []
 
         Print invoice ->
             model !
@@ -474,9 +492,9 @@ drawView model =
         None ->
             [ button [ onClick Add ] [ text "Add Invoice" ]
             , Table.view config model.tableState model.invoices
-            , model.showModal
-                |> Modal.view
-                |> Html.map ModalMsg
+--            , model.showModal
+--                |> Modal.view
+--                |> Html.map ModalMsg
             ]
 
         Adding ->
@@ -555,8 +573,8 @@ config =
 --        , customColumn "" ( viewButton AddEntry "Add Entry" )
         , customColumn "" ( viewButton Edit "Edit" )
         , customColumn "" ( viewButton Delete "Delete" )
-        , customColumn "" ( viewButton PrintPreview "Preview" )
---        , customColumn "" ( viewButton Print "Print" )
+--        , customColumn "" ( viewButton PrintPreview "Preview" )
+        , customColumn "" ( viewButton Export "Export" )
         ]
     , customizations =
         { defaultCustomizations | rowAttrs = toRowAttrs }

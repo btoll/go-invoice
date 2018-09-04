@@ -1,37 +1,33 @@
 module Modal.Delete exposing (Msg, update, view)
 
-import Data.Invoice exposing (Invoice)
 import Html exposing (Html, button, div, p, text)
+import Html.Attributes exposing (id)
 import Html.Events exposing (onClick)
-import Http
-import Request.Invoice
-import Task
-
 
 
 type Msg
-    = Yes Invoice
+    = Yes
     | No
 
 
 
-update : Msg -> ( Invoice -> Cmd msg ) -> ( Bool, Cmd msg )
-update msg fn =
+update : Msg -> Bool
+update msg =
     case msg of
-        Yes invoice ->
-            ( True, invoice |> fn )
+        Yes ->
+            True
 
         No ->
-            ( False, Cmd.none )
+            False
 
 
 
-view : Invoice -> Html Msg
-view invoice =
-    div [] [
-        p [] [ text "Are you sure you wish to proceed?  This will also permanently delete all of the invoice's entries.  This is irreversible!" ]
-        , button [ invoice |> Yes |> onClick ] [ text "Yes" ]
-        , button [ onClick No ] [ text "No" ]
+view : Html Msg
+view =
+    div [ "delete" |> id ] [
+        p [] [ text "Are you sure you wish to proceed?  This is irreversible!" ]
+        , button [ Yes |> onClick ] [ text "Yes" ]
+        , button [ No |> onClick ] [ text "No" ]
         ]
 
 

@@ -1,7 +1,8 @@
 module Modal.Preview exposing (Msg, update, view)
 
+import Data.Entry exposing (Entry)
 import Data.Invoice exposing (Invoice)
-import Html exposing (Html, button, div, p, text)
+import Html exposing (Html, button, div, h1, li, p, text, ul)
 import Html.Events exposing (onClick)
 
 
@@ -12,29 +13,70 @@ type Msg
 
 
 
-update : Msg -> ( Invoice -> Cmd msg ) -> ( Bool, Cmd msg )
-update msg fn =
+entryItem : Entry -> Html Msg
+entryItem entry =
+    li [] [
+        p [] [ text entry.title ]
+        , p [] [ text ( (++) "Date: " entry.date ) ]
+        , p [] [ text ( (++) "URL: " entry.url ) ]
+        , p [] [ text ( (++) "Comment: " entry.comment ) ]
+        , p [] [ text ( (++) "Hours: "( entry.hours |> toString ) ) ]
+    ]
+
+
+invoiceHeader : Invoice -> Html Msg
+invoiceHeader invoice =
+    div [] [
+        h1 [] [ text invoice.title ]
+        , p [] [ text ( (++) "From: " invoice.dateFrom ) ]
+        , p [] [ text ( (++) "To: " invoice.dateTo ) ]
+        , p [] [ text ( (++) "URL: " invoice.url ) ]
+        , p [] [ text ( (++) "Comment: " invoice.comment ) ]
+        , p [] [ text ( (++) "Rate: " ( invoice.rate |> toString ) ) ]
+        , p [] [ text ( (++) "Total Hours: "( invoice.totalHours |> toString ) ) ]
+    ]
+
+
+
+update : Msg -> Bool
+update msg =
     case msg of
         Close ->
-            ( True, Cmd.none )
+            True
 
         Print ->
 --            ( True, invoice |> fn )
-            ( True, Cmd.none )
+            True
 
 
 
-view : Invoice -> Html Msg
-view invoice =
+--view : Invoice -> Html Msg
+--view invoice =
+--    let
+--        i = (Debug.log "invoice" invoice)
+--    in
+--    div [] [
+--        invoice |> invoiceHeader
+--        , div [] [
+--            p [] [ "Entries: " |> text  ]
+--            , ul []
+--                ( invoice.entries |> List.map entryItem )
+--        ]
+--        , button [ onClick Print ] [ text "Print" ]
+--        , button [ onClick Close ] [ text "Close" ]
+--        ]
+
+view : Html Msg
+view =
     div [] [
-        p [] [ text invoice.title ]
-        , p [] [ text invoice.dateFrom ]
-        , p [] [ text invoice.dateTo ]
-        , p [] [ text invoice.url ]
-        , p [] [ text invoice.comment ]
-        , p [] [ text ( invoice.rate |> toString ) ]
-        , p [] [ text ( invoice.totalHours |> toString ) ]
-        , button [ onClick Print ] [ text "Print" ]
+--        invoice |> invoiceHeader
+--        , div [] [
+--            p [] [ "Entries: " |> text  ]
+--            , ul []
+--                ( invoice.entries |> List.map entryItem )
+--        ]
+--        , button [ onClick Print ] [ text "Print" ]
+        button [ onClick Print ] [ text "Print" ]
         , button [ onClick Close ] [ text "Close" ]
         ]
 
