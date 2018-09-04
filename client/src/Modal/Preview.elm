@@ -45,7 +45,6 @@ update msg =
             True
 
         Print ->
---            ( True, invoice |> fn )
             True
 
 

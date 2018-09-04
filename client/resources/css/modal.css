@@ -17,6 +17,7 @@
     height: auto;
     max-height: 80%;
     max-width: 95%;
+    overflow: auto;
     padding: 10px;
     transform: translate(-50%, -50%);
     width: 700px;

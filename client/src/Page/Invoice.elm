@@ -297,18 +297,32 @@ update url msg model =
 
         ModalMsg subMsg ->
             let
-                ( showModal, editing, cmd ) =
-                    case subMsg |> Modal.update of
-                        False ->
-                            ( False, Nothing, Cmd.none )
+                pattern =
+                    model.showModal
+                        |> Tuple.second
+                        |> Maybe.withDefault ( Modal.Delete Nothing )
 
-                        True ->
-                            ( True
+                ( showModal, editing, cmd ) =
+                    case ( subMsg |> Modal.update, pattern ) of
+                        ( True, Modal.Delete Nothing ) ->
+                            ( False
                             , Nothing
                             , Maybe.withDefault new model.editing
                                 |> Request.Invoice.delete url
                                 |> Http.toTask
                                 |> Task.attempt Deleted
+                            )
+
+                        ( True, Modal.Preview ( Just invoice ) ) ->
+                            ( False
+                            , Nothing
+                            , Cmd.none
+                            )
+
+                        ( _, _ ) ->
+                            ( False
+                            , Nothing
+                            , Cmd.none
                             )
             in
             { model |
