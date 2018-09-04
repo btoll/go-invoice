@@ -3,6 +3,7 @@ package main
 import (
 	"html/template"
 	"os"
+	"time"
 
 	"github.com/btoll/go-invoice/server/app"
 	"github.com/btoll/go-invoice/server/sql"
@@ -74,14 +75,17 @@ func (c *InvoiceController) Export(ctx *app.ExportInvoiceContext) error {
 		return goa.ErrInternal(err, "endpoint", "export")
 	}
 	row := rec.(*app.InvoiceMedia)
+	current_time := time.Now().Local()
 	inv := view.Invoice{
-		ID:         row.ID,
-		Title:      row.Title,
-		DateFrom:   row.DateFrom,
-		DateTo:     row.DateTo,
-		Rate:       row.Rate,
-		TotalHours: row.TotalHours,
-		Entries:    entries.(app.EntryMediaCollection),
+		ID:          row.ID,
+		Title:       row.Title,
+		CurrentDate: current_time.Format("01/02/2006"),
+		Amount:      row.Rate * row.TotalHours,
+		DateFrom:    row.DateFrom,
+		DateTo:      row.DateTo,
+		Rate:        row.Rate,
+		TotalHours:  row.TotalHours,
+		Entries:     entries.(app.EntryMediaCollection),
 	}
 	f, err := os.Create("invoices/foo.html")
 	if err != nil {
