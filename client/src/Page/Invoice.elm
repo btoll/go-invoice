@@ -132,10 +132,10 @@ type Msg
     | Export Invoice
     | Exported ( Result Http.Error Invoice )
     | FetchedInvoice ( Result Http.Error ( List Invoice ) )
---    | ModalMsg Modal.Msg
+    | ModalMsg Modal.Msg
     | Post
     | Posted ( Result Http.Error Invoice )
---    | PrintPreview
+    | PrintPreview Invoice
     | Print Invoice
     | Printed ( Result Http.Error Invoice )
     | Put
@@ -241,11 +241,8 @@ update url msg model =
 
         Delete invoice ->
             { model |
-                showModal =
-                    ( True
---                    , invoice |> Modal.Delete |> Just
-                    , Nothing
-                    )
+                editing = invoice |> Just
+                , showModal = ( True, Nothing |> Modal.Delete |> Just )
             } ! []
 
         Deleted ( Ok deletedInvoice ) ->
@@ -298,18 +295,25 @@ update url msg model =
                 , tableState = Table.initialSort "ID"
             } ! []
 
---        ModalMsg subMsg ->
---            let
---                ( bool, cmd ) =
---                    ( \invoice ->
---                        Request.Invoice.delete url invoice
---                            |> Http.toTask
---                            |> Task.attempt Deleted
---                    ) |> Modal.update subMsg
---            in
---            { model |
---                showModal = ( bool, Nothing )
---            } ! [ cmd ]
+        ModalMsg subMsg ->
+            let
+                ( showModal, editing, cmd ) =
+                    case subMsg |> Modal.update of
+                        False ->
+                            ( False, Nothing, Cmd.none )
+
+                        True ->
+                            ( True
+                            , Nothing
+                            , Maybe.withDefault new model.editing
+                                |> Request.Invoice.delete url
+                                |> Http.toTask
+                                |> Task.attempt Deleted
+                            )
+            in
+            { model |
+                showModal = ( showModal, Nothing )
+            } ! [ cmd ]
 
         Post ->
             let
@@ -363,10 +367,10 @@ update url msg model =
                 editing = Nothing
             } ! []
 
---        PrintPreview invoice ->
---            { model |
---                showModal = ( True, Modal.Preview |> Just )
---            } ! []
+        PrintPreview invoice ->
+            { model |
+                showModal = ( True, invoice |> Just |> Modal.Preview |> Just )
+            } ! []
 
         Print invoice ->
             model !
@@ -492,9 +496,9 @@ drawView model =
         None ->
             [ button [ onClick Add ] [ text "Add Invoice" ]
             , Table.view config model.tableState model.invoices
---            , model.showModal
---                |> Modal.view
---                |> Html.map ModalMsg
+            , model.showModal
+                |> Modal.view model.editing
+                |> Html.map ModalMsg
             ]
 
         Adding ->
@@ -573,7 +577,7 @@ config =
 --        , customColumn "" ( viewButton AddEntry "Add Entry" )
         , customColumn "" ( viewButton Edit "Edit" )
         , customColumn "" ( viewButton Delete "Delete" )
---        , customColumn "" ( viewButton PrintPreview "Preview" )
+        , customColumn "" ( viewButton PrintPreview "Preview" )
         , customColumn "" ( viewButton Export "Export" )
         ]
     , customizations =

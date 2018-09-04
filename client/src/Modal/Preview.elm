@@ -50,33 +50,16 @@ update msg =
 
 
 
---view : Invoice -> Html Msg
---view invoice =
---    let
---        i = (Debug.log "invoice" invoice)
---    in
---    div [] [
---        invoice |> invoiceHeader
---        , div [] [
---            p [] [ "Entries: " |> text  ]
---            , ul []
---                ( invoice.entries |> List.map entryItem )
---        ]
---        , button [ onClick Print ] [ text "Print" ]
---        , button [ onClick Close ] [ text "Close" ]
---        ]
-
-view : Html Msg
-view =
+view : Invoice -> Html Msg
+view invoice =
     div [] [
---        invoice |> invoiceHeader
---        , div [] [
---            p [] [ "Entries: " |> text  ]
---            , ul []
---                ( invoice.entries |> List.map entryItem )
---        ]
---        , button [ onClick Print ] [ text "Print" ]
-        button [ onClick Print ] [ text "Print" ]
+        invoice |> invoiceHeader
+        , div [] [
+            p [] [ "Entries: " |> text  ]
+            , ul []
+                ( invoice.entries |> List.map entryItem )
+        ]
+        , button [ onClick Print ] [ text "Print" ]
         , button [ onClick Close ] [ text "Close" ]
         ]
 

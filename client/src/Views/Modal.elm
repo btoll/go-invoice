@@ -1,6 +1,6 @@
 module Views.Modal exposing (Modal(..), Msg, update, view)
 
-import Data.Invoice as Invoice
+import Data.Invoice exposing (Invoice, new)
 import Html exposing (Html, Attribute, button, div, text)
 import Html.Attributes exposing (id, style)
 import Html.Events exposing (onClick)
@@ -10,8 +10,8 @@ import Modal.Preview as Preview
 
 
 type Modal
-    = Delete
-    | Preview
+    = Delete ( Maybe Invoice )
+    | Preview ( Maybe Invoice )
 
 
 
@@ -31,20 +31,21 @@ update msg =
             Preview.update subMsg
 
 
-view : ( Bool, Maybe Modal ) -> Html Msg
-view modal =
+view : Maybe Invoice -> ( Bool, Maybe Modal ) -> Html Msg
+view invoice modal =
     case modal of
         ( True, Just modal ) ->
             let
                 view : Html Msg
                 view =
                     case modal of
-                        Delete ->
+                        Delete _ ->
                             Delete.view
                                 |> Html.map DeleteMsg
 
-                        Preview ->
-                            Preview.view
+                        Preview invoice ->
+                            Maybe.withDefault new invoice
+                                |> Preview.view
                                 |> Html.map PreviewMsg
             in
             div [ "modal-mask" |> id ] [

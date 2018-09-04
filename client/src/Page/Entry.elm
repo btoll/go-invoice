@@ -129,7 +129,7 @@ update url msg model =
 
         Cancel ->
             { model |
-                action = None
+                action = Selected
                 , editing = Nothing
                 , date = Nothing
             } ! []
@@ -173,7 +173,7 @@ update url msg model =
         Delete entry ->
             { model |
                 editing = entry |> Just
-                , showModal = ( True, Modal.Delete |> Just )
+                , showModal = ( True, Nothing |> Modal.Delete |> Just )
             } ! []
 
         Deleted ( Ok deletedEntry ) ->
@@ -441,7 +441,7 @@ drawView model =
                 , button [ onClick Add ] [ text "Add Entry" ]
                 , Table.view config model.tableState model.entries
                 , model.showModal
-                    |> Modal.view
+                    |> Modal.view Nothing
                     |> Html.map ModalMsg
                 ]
 
