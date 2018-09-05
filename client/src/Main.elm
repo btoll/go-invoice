@@ -127,6 +127,9 @@ update msg model =
         ( SetRoute route, _ ) ->
             setRoute route model
 
+        ( CompanyMsg subMsg, Company subModel ) ->
+            toPage Company CompanyMsg Company.update subMsg subModel
+
         ( EntryMsg subMsg, Entry subModel ) ->
             toPage Entry EntryMsg Entry.update subMsg subModel
 

@@ -53,13 +53,13 @@ func (s *Invoice) Create(db *mysql.DB) (interface{}, error) {
 }
 
 func (s *Invoice) Read(db *mysql.DB) (interface{}, error) {
-	rows, err := db.Query(fmt.Sprintf(s.Stmt["GET_ONE"], s.Data.(int)))
+	id := s.Data.(int)
+	rows, err := db.Query(fmt.Sprintf(s.Stmt["GET_ONE"], id))
 	if err != nil {
 		return nil, err
 	}
 	row := &app.InvoiceMedia{}
 	for rows.Next() {
-		var id int
 		var company_id int
 		var title string
 		var dateFrom string

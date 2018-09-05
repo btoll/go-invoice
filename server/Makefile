@@ -3,7 +3,7 @@
 SHELL 		= /bin/sh
 CC      	= go
 GENERATED	= .__gen__
-GOADESIGN	= design/api.go design/entry.go design/invoice.go
+GOADESIGN	= design/*
 TARGET		= go-invoice
 WATCHER		= entr
 

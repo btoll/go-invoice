@@ -20,7 +20,7 @@ var _ = Resource("Invoice", func() {
 	Action("show", func() {
 		Routing(GET("/:id"))
 		Params(func() {
-			Param("id", String, "Invoice ID")
+			Param("id", Integer, "Invoice ID")
 		})
 		Description("Get an invoice by id.")
 		Response(OK, InvoiceMedia)
@@ -31,7 +31,7 @@ var _ = Resource("Invoice", func() {
 		Routing(PUT("/:id"))
 		Payload(InvoicePayload)
 		Params(func() {
-			Param("id", String, "Invoice ID")
+			Param("id", Integer, "Invoice ID")
 		})
 		Description("Update an invoice by id.")
 		Response(OK, func() {
@@ -55,7 +55,10 @@ var _ = Resource("Invoice", func() {
 	})
 
 	Action("list", func() {
-		Routing(GET("/list"))
+		Routing(GET("/list/:company_id"))
+		Params(func() {
+			Param("company_id", Integer, "Company ID")
+		})
 		Description("Get all invoices")
 		Response(OK, CollectionOf(InvoiceMedia))
 		Response(BadRequest, ErrorMedia)

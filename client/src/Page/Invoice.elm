@@ -1,5 +1,6 @@
 module Page.Invoice exposing (Model, Msg, init, update, view)
 
+import Data.Company exposing (Company)
 import Data.Invoice exposing (Invoice, new)
 import Date exposing (Date, Day(..), day, dayOfWeek, month, year)
 import DatePicker exposing (defaultSettings, DateEvent(..))
@@ -8,6 +9,7 @@ import Html.Attributes exposing (action, autofocus, checked, disabled, for, id, 
 import Html.Events exposing (onClick, onInput, onSubmit)
 import Html.Lazy exposing (lazy)
 import Http
+import Request.Company
 import Request.Invoice
 import Table exposing (defaultCustomizations)
 import Task exposing (Task)
@@ -29,7 +31,10 @@ type alias Model =
     , action : Action
     , editing : Maybe Invoice
     , disabled : Bool
+
     , invoices : List Invoice
+    , companies : List Company
+    , selectedCompanyID : Int
 
     , startDate : Maybe Date
     , endDate : Maybe Date
@@ -40,7 +45,7 @@ type alias Model =
     }
 
 
-type Action = None | Adding | Editing
+type Action = None | Adding | Editing | Selected
 
 
 
@@ -103,7 +108,10 @@ init url =
     , action = None
     , editing = Nothing
     , disabled = True
+
     , invoices = []
+    , companies = []
+    , selectedCompanyID = -1
 
     , startDate = Nothing
     , endDate = Nothing
@@ -113,7 +121,7 @@ init url =
     , showModal = ( False, Nothing )
     } ! [ Cmd.map DatePickerStart startDatePickerFx
         , Cmd.map DatePickerEnd endDatePickerFx
-        , Request.Invoice.list url |> Http.send FetchedInvoice
+        , Request.Company.list url |> Http.send FetchedCompany
         ]
 
 
@@ -123,6 +131,7 @@ init url =
 type Msg
     = Add
     | Cancel
+    | CompanySelected String
     | DatePickerEnd DatePicker.Msg
     | DatePickerStart DatePicker.Msg
     | Delete Invoice
@@ -130,6 +139,7 @@ type Msg
     | Edit Invoice
     | Export Invoice
     | Exported ( Result Http.Error Invoice )
+    | FetchedCompany ( Result Http.Error ( List Company ) )
     | FetchedInvoice ( Result Http.Error ( List Invoice ) )
     | ModalMsg Modal.Msg
     | Post
@@ -153,11 +163,24 @@ update url msg model =
 
         Cancel ->
             { model |
-                action = None
+                action = Selected
                 , editing = Nothing
                 , startDate = Nothing
                 , endDate = Nothing
             } ! []
+
+        CompanySelected company_id ->
+            let
+                id = company_id |> Form.toInt
+            in
+            { model |
+                selectedCompanyID = id
+                , action = if (==) id -1 then None else Selected
+            } !
+                [ company_id
+                    |> Request.Invoice.get url
+                    |> Http.send FetchedInvoice
+                ]
 
         DatePickerEnd subMsg ->
             let
@@ -274,6 +297,18 @@ update url msg model =
         Exported ( Err err ) ->
             model ! []
 
+        FetchedCompany ( Ok companies ) ->
+            { model |
+                companies = companies
+                , tableState = Table.initialSort "ID"
+            } ! []
+
+        FetchedCompany ( Err err ) ->
+            { model |
+                companies = []
+                , tableState = Table.initialSort "ID"
+            } ! []
+
         FetchedInvoice ( Ok invoices ) ->
             { model |
                 invoices = invoices
@@ -306,14 +341,14 @@ update url msg model =
                             )
 
                         -- PrintPreview, Close
-                        ( False, Modal.Preview ( Just invoice ) ) ->
+                        ( False, Modal.PrintPreview ( Just invoice ) ) ->
                             ( False
                             , Nothing
                             , Cmd.none
                             )
 
                         -- PrintPreview, Print
-                        ( True, Modal.Preview ( Just invoice ) ) ->
+                        ( True, Modal.PrintPreview ( Just invoice ) ) ->
                             ( False
                             , Nothing
                             , Maybe.withDefault new model.editing
@@ -346,10 +381,10 @@ update url msg model =
                 ( action, subCmd ) = if errors |> List.isEmpty then
                     case model.editing of
                         Nothing ->
-                            ( None, Cmd.none )
+                            ( Selected, Cmd.none )
 
                         Just invoice ->
-                            ( None
+                            ( Selected
                             , Request.Invoice.post url invoice
                                 |> Http.toTask
                                 |> Task.attempt Posted
@@ -388,7 +423,7 @@ update url msg model =
         PrintPreview invoice ->
             { model |
                 editing = invoice |> Just
-                , showModal = ( True, invoice |> Just |> Modal.Preview |> Just )
+                , showModal = ( True, invoice |> Just |> Modal.PrintPreview |> Just )
             } ! []
 
         Put ->
@@ -404,10 +439,12 @@ update url msg model =
                 ( action, subCmd ) = if errors |> List.isEmpty then
                     case model.editing of
                         Nothing ->
-                            ( None, Cmd.none )
+                            ( Selected
+                            , Cmd.none
+                            )
 
                         Just invoice ->
-                            ( None
+                            ( Selected
                             , Request.Invoice.put url invoice
                                 |> Http.toTask
                                 |> Task.attempt Putted
@@ -495,15 +532,31 @@ drawView model =
 
             Just invoice ->
                 invoice
+
+        options : List Company -> List ( Html Msg )
+        options companies =
+            companies
+                |> List.map ( \m -> ( m.id |> toString, m.name ++ " | " ++ m.city ++ ", " ++ m.state ) )
+                |> (::) ( "-1", "-- Select an company --" )
+                |> List.map ( model.selectedCompanyID |> toString |> Form.option )
+
+        selectCompany =
+            Form.select "Company"
+                [ id "companySelection"
+                , onInput CompanySelected
+                ]
+                ( model.companies |> options )
     in
     case model.action of
         None ->
-            [ button [ onClick Add ] [ text "Add Invoice" ]
-            , Table.view config model.tableState model.invoices
-            , model.showModal
-                |> Modal.view model.editing
-                |> Html.map ModalMsg
+            [ selectCompany
             ]
+--            [ button [ onClick Add ] [ text "Add Invoice" ]
+--            , Table.view config model.tableState model.invoices
+--            , model.showModal
+--                |> Modal.view model.editing
+--                |> Html.map ModalMsg
+--            ]
 
         Adding ->
             [ form [ onSubmit Post ]
@@ -515,6 +568,14 @@ drawView model =
                 ( formFields model editable )
             ]
 
+        Selected ->
+            [ selectCompany
+            , button [ onClick Add ] [ text "Add Entry" ]
+            , Table.view config model.tableState model.invoices
+            , model.showModal
+                |> Modal.view Nothing
+                |> Html.map ModalMsg
+            ]
 
 formFields : Model -> Invoice -> List ( Html Msg )
 formFields model invoice =
@@ -581,7 +642,7 @@ config =
         , customColumn "" ( viewButton Edit "Edit" )
         , customColumn "" ( viewButton Delete "Delete" )
         , customColumn "" ( viewButton PrintPreview "Print Preview" )
-        , customColumn "" ( viewButton Export "Export" )
+        , customColumn "" ( viewButton Export "Export as HTML" )
         ]
     , customizations =
         { defaultCustomizations | rowAttrs = toRowAttrs }

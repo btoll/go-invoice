@@ -1,6 +1,6 @@
 module Data.Company exposing (Company, decoder, encoder, manyDecoder, new, succeed)
 
-import Data.Entry exposing (Entry)
+import Data.Invoice exposing (Invoice)
 import Json.Decode as Decode exposing (Decoder, float, int, list, string)
 import Json.Decode.Pipeline exposing (decode, optional, required)
 import Json.Encode as Encode
@@ -18,6 +18,7 @@ type alias Company =
     , zip : String
     , url : String
     , comment : String
+    , invoices : List Invoice
     }
 
 
@@ -33,6 +34,7 @@ new =
     , zip = ""
     , url = ""
     , comment = ""
+    , invoices = []
     }
 
 
@@ -49,6 +51,7 @@ decoder =
         |> required "zip" string
         |> required "url" string
         |> required "comment" string
+        |> optional "invoices" ( Data.Invoice.decoder |> Decode.list ) []
 
 
 manyDecoder : Decoder ( List Company )

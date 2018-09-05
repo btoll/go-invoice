@@ -5,19 +5,19 @@ import Html exposing (Html, Attribute, button, div, text)
 import Html.Attributes exposing (id, style)
 import Html.Events exposing (onClick)
 import Modal.Delete as Delete
-import Modal.Preview as Preview
+import Modal.PrintPreview as PrintPreview
 
 
 
 type Modal
     = Delete ( Maybe Invoice )
-    | Preview ( Maybe Invoice )
+    | PrintPreview ( Maybe Invoice )
 
 
 
 type Msg
     = DeleteMsg Delete.Msg
-    | PreviewMsg Preview.Msg
+    | PrintPreviewMsg PrintPreview.Msg
 
 
 
@@ -27,8 +27,8 @@ update msg =
         DeleteMsg subMsg ->
             Delete.update subMsg
 
-        PreviewMsg subMsg ->
-            Preview.update subMsg
+        PrintPreviewMsg subMsg ->
+            PrintPreview.update subMsg
 
 
 view : Maybe Invoice -> ( Bool, Maybe Modal ) -> Html Msg
@@ -43,10 +43,10 @@ view invoice modal =
                             Delete.view
                                 |> Html.map DeleteMsg
 
-                        Preview invoice ->
+                        PrintPreview invoice ->
                             Maybe.withDefault new invoice
-                                |> Preview.view
-                                |> Html.map PreviewMsg
+                                |> PrintPreview.view
+                                |> Html.map PrintPreviewMsg
             in
             div [ "modal-mask" |> id ] [
                 div [ "modal-content" |> id ] [ view ]

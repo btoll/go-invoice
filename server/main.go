@@ -23,6 +23,8 @@ func main() {
 	app.MountInvoiceController(service, c)
 	d := NewEntryController(service)
 	app.MountEntryController(service, d)
+	e := NewCompanyController(service)
+	app.MountCompanyController(service, e)
 
 	// Start service
 	if err := service.ListenAndServe(":8080"); err != nil {

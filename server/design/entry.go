@@ -19,7 +19,7 @@ var _ = Resource("Entry", func() {
 	Action("show", func() {
 		Routing(GET("/:id"))
 		Params(func() {
-			Param("id", String, "Entry ID")
+			Param("id", Integer, "Entry ID")
 		})
 		Description("Get an entry by id.")
 		Response(OK, EntryMedia)
@@ -29,7 +29,7 @@ var _ = Resource("Entry", func() {
 		Routing(PUT("/:id"))
 		Payload(EntryPayload)
 		Params(func() {
-			Param("id", String, "Entry ID")
+			Param("id", Integer, "Entry ID")
 		})
 		Description("Update an entry by id.")
 		Response(OK, func() {

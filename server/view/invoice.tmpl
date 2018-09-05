@@ -42,6 +42,22 @@ body {
 #entries li {
     margin: 20px 0;
 }
+
+/* Override table styles set in global `site.css` */
+#entries table {
+    border-collapse: separate;
+    margin: 0;
+}
+#entries td {
+    padding: 0;
+}
+/**/
+
+#period {
+    border-top: 1px solid #000;
+    border-bottom: 1px solid #000;
+    padding: 10px 0;
+}
 #footer {
     margin-top: 30px;
 }
@@ -61,14 +77,12 @@ body {
             <p><span>Invoice Hours:</span> {{ .TotalHours }}</p>
             <p><span>Invoice Amount:</span> ${{ .Amount }}</p>
         </div>
-
         <div id="from" class="box">
             <h4>From:</h4>
             <p>Benjamin Toll</p>
             <p>113 Old Colony Road</p>
             <p>Princeton, MA 01541</p>
         </div>
-
         <div id="to" class="box">
             <h4>Bill To:</h4>
             <p>Benjamin Toll</p>
@@ -78,6 +92,9 @@ body {
     </div>
 
     <div id="entries">
+        <p id="period">
+            <span class="bold">Period - </span><span>{{ .DateFrom }}</span> // <span>{{ .DateTo }}</span>
+        </p>
         <h4>Work Description:</h4>
         <ul>
             {{ with .Entries }}

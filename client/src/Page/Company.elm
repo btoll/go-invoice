@@ -373,6 +373,36 @@ formFields model company =
         , autofocus True
         ]
         []
+    , Form.text "Contact"
+        [ value company.contact
+        , onInput ( SetFormValue ( \v -> { company | contact = v } ) )
+        ]
+        []
+    , Form.text "Street1"
+        [ value company.street1
+        , onInput ( SetFormValue ( \v -> { company | street1 = v } ) )
+        ]
+        []
+    , Form.text "Street2"
+        [ value company.street2
+        , onInput ( SetFormValue ( \v -> { company | street2 = v } ) )
+        ]
+        []
+    , Form.text "City"
+        [ value company.city
+        , onInput ( SetFormValue ( \v -> { company | city = v } ) )
+        ]
+        []
+    , Form.text "State"
+        [ value company.state
+        , onInput ( SetFormValue ( \v -> { company | state = v } ) )
+        ]
+        []
+    , Form.text "Zip"
+        [ value company.zip
+        , onInput ( SetFormValue ( \v -> { company | zip = v } ) )
+        ]
+        []
     , Form.text "URL"
         [ value company.url
         , onInput ( SetFormValue ( \v -> { company | url = v } ) )
@@ -383,6 +413,7 @@ formFields model company =
         , onInput ( SetFormValue ( \v -> { company | comment = v } ) )
         ]
         []
+    , Form.submit model.disabled Cancel
     ]
 
 
@@ -398,6 +429,12 @@ config =
     , toMsg = SetTableState
     , columns =
         [ Table.stringColumn "Name" .name
+        , Table.stringColumn "Contact" .contact
+        , Table.stringColumn "Street1" .street1
+        , Table.stringColumn "Street2" .street2
+        , Table.stringColumn "City" .city
+        , Table.stringColumn "State" .state
+        , Table.stringColumn "Zip" .zip
         , Table.stringColumn "URL" .url
         , Table.stringColumn "Comment" .comment
         , customColumn "" ( viewButton Edit "Edit" )

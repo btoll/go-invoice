@@ -77,22 +77,24 @@ init url =
         ( datePicker, datePickerFx ) =
             DatePicker.init
     in
-        { errors = []
-        , tableState = Table.initialSort "ID"
-        , action = None
-        , editing = Nothing
-        , disabled = True
+    { errors = []
+    , tableState = Table.initialSort "ID"
+    , action = None
+    , editing = Nothing
+    , disabled = True
 
-        , entries = []
-        , invoices = []
-        , selectedInvoiceID = -1
+    , entries = []
+    , invoices = []
+    , selectedInvoiceID = -1
 
-        , date = Nothing
-        , datePicker = datePicker
-        , showModal = ( False, Nothing )
-        } ! [ Cmd.map DatePicker datePickerFx
-            , Request.Invoice.list url |> Http.send FetchedInvoice
-            ]
+    , date = Nothing
+    , datePicker = datePicker
+    , showModal = ( False, Nothing )
+    } ! [ Cmd.map DatePicker datePickerFx
+        , "1"
+            |> Request.Invoice.get url
+            |> Http.send FetchedInvoice
+        ]
 
 
 -- UPDATE
@@ -313,7 +315,9 @@ update url msg model =
                 ( action, subCmd ) = if errors |> List.isEmpty then
                     case model.editing of
                         Nothing ->
-                            ( Selected, Cmd.none )
+                            ( Selected
+                            , Cmd.none
+                            )
 
                         Just entry ->
                             ( Selected
@@ -419,31 +423,31 @@ drawView model =
                 ]
                 ( model.invoices |> options )
     in
-        case model.action of
-            None ->
-                [ selectInvoice
-                ]
+    case model.action of
+        None ->
+            [ selectInvoice
+            ]
 
-            Adding ->
-                [ selectInvoice
-                , form [ onSubmit Post ]
-                    ( formFields model editable )
-                ]
+        Adding ->
+            [ selectInvoice
+            , form [ onSubmit Post ]
+                ( formFields model editable )
+            ]
 
-            Editing ->
-                [ selectInvoice
-                , form [ onSubmit Put ]
-                    ( formFields model editable )
-                ]
+        Editing ->
+            [ selectInvoice
+            , form [ onSubmit Put ]
+                ( formFields model editable )
+            ]
 
-            Selected ->
-                [ selectInvoice
-                , button [ onClick Add ] [ text "Add Entry" ]
-                , Table.view config model.tableState model.entries
-                , model.showModal
-                    |> Modal.view Nothing
-                    |> Html.map ModalMsg
-                ]
+        Selected ->
+            [ selectInvoice
+            , button [ onClick Add ] [ text "Add Entry" ]
+            , Table.view config model.tableState model.entries
+            , model.showModal
+                |> Modal.view Nothing
+                |> Html.map ModalMsg
+            ]
 
 
 formFields : Model -> Entry -> List ( Html Msg )

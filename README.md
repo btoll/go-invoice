@@ -10,7 +10,7 @@ Written in Go
 
 ## Creating a PDF
 
-cat foo.html | wkhtmltopdf - foo.pdf
+    cat foo.html | wkhtmltopdf - foo.pdf
 
 ## License
 

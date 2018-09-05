@@ -7,7 +7,7 @@ CREATE TABLE `entry` (
   `invoice_id` int(11) NOT NULL,
   `title` varchar(255) NOT NULL,
   `date` date NOT NULL,
-  `url` varchar(255) DEFAULT NULL,
+  `url` varchar(255),
   `comment` text,
   `hours` FLOAT NOT NULL DEFAULT 0.0,
   PRIMARY KEY (`id`),

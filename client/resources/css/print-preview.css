@@ -1,0 +1,59 @@
+.bold {
+    font-weight: bold;
+}
+.box {
+    border-radius: 10px;
+    margin-bottom: 20px;
+    padding: 10px;
+    width: 280px;;
+}
+.box h4 {
+    margin: 0;
+}
+.box p {
+    margin: 5px 0;
+    padding: 0;
+}
+.box span {
+    font-weight: bold;
+}
+#invoiceInfo {
+    background-color: #ccc;
+}
+#from {
+    background-color: antiquewhite;
+}
+#to {
+    background-color: #b3e6cc;
+}
+#entries {
+    margin-top: 30px;
+}
+#entries li {
+    margin: 20px 0;
+}
+
+/* Override table styles set in global `site.css` */
+#entries table {
+    border-collapse: separate;
+    margin: 0;
+}
+#entries td {
+    padding: 0;
+}
+/**/
+
+#period {
+    border-top: 1px solid #000;
+    border-bottom: 1px solid #000;
+    padding: 10px 0;
+}
+#footer {
+    margin-top: 30px;
+}
+#footer p {
+    font-weight: bold;
+    margin: 5px 0;
+    padding: 0;
+}
+
