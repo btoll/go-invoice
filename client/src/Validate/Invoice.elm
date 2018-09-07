@@ -1,35 +1,15 @@
-module Validate.Invoice exposing (Field, errors)
+module Validate.Invoice exposing (errors)
 
 import Data.Invoice exposing (Invoice)
-import Validate exposing (Validator, ifBlank, validate)
+import Validate.Validate exposing (fold, isBlank, isZero)
 
 
 
-type Field
-    = Title
-    | DateFrom
-    | DateTo
---    | Rate
-
-
-
-errors : Invoice -> List ( Field, String )
-errors invoice =
-    validate modelValidator invoice
-
-
-message : String
-message =
-    "Cannot be blank."
-
-
-modelValidator : Validator ( Field, String ) Invoice
-modelValidator =
-    Validate.all
-        [ ifBlank .title ( Title, message)
-        , ifBlank .dateFrom ( DateFrom, message)
-        , ifBlank .dateTo ( DateTo, message)
---        , ifBlank .rate ( Rate, message)
-        ]
+errors : Invoice -> List String
+errors model =
+    [ isBlank model.dateFrom "Invoice Date From cannot be blank."
+    , isBlank model.dateTo "Invoice Date To cannot be blank."
+    , isZero model.rate "Invoice rate cannot be zero."
+    ] |> fold
 
 

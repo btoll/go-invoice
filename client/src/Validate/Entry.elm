@@ -1,31 +1,15 @@
-module Validate.Entry exposing (Field, errors)
+module Validate.Entry exposing (errors)
 
 import Data.Entry exposing (Entry)
-import Validate exposing (Validator, ifBlank, validate)
+import Validate.Validate exposing (fold, isBlank, isZero)
 
 
 
-type Field
-    = Title
-    | Date
-
-
-
-errors : Entry -> List ( Field, String )
-errors entry =
-    validate modelValidator entry
-
-
-message : String
-message =
-    "Cannot be blank."
-
-
-modelValidator : Validator ( Field, String ) Entry
-modelValidator =
-    Validate.all
-        [ ifBlank .title ( Title, message)
-        , ifBlank .date ( Date, message)
-        ]
+errors : Entry -> List String
+errors model =
+    [ isBlank model.title "Entry title cannot be blank."
+    , isBlank model.date "Entry date cannot be blank."
+    , isZero model.hours "Entry hours contact cannot be zero."
+    ] |> fold
 
 

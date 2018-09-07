@@ -78,7 +78,6 @@ func (c *InvoiceController) Export(ctx *app.ExportInvoiceContext) error {
 	current_time := time.Now().Local()
 	inv := view.Invoice{
 		ID:          row.ID,
-		Title:       row.Title,
 		CurrentDate: current_time.Format("01/02/2006"),
 		TotalHours:  row.TotalHours,
 		Amount:      row.Rate * row.TotalHours,

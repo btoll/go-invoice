@@ -89,10 +89,6 @@ var InvoicePayload = Type("InvoicePayload", func() {
 		Metadata("struct:tag:datastore", "company_id,noindex")
 		Metadata("struct:tag:json", "company_id")
 	})
-	Attribute("title", String, "Invoice title", func() {
-		Metadata("struct:tag:datastore", "title,noindex")
-		Metadata("struct:tag:json", "title")
-	})
 	Attribute("dateFrom", String, "Invoice date from", func() {
 		Metadata("struct:tag:datastore", "dateFrom,noindex")
 		Metadata("struct:tag:json", "dateFrom")
@@ -125,7 +121,7 @@ var InvoicePayload = Type("InvoicePayload", func() {
 		Metadata("struct:tag:json", "entries")
 	})
 
-	Required("company_id", "title", "dateFrom", "dateTo", "url", "comment", "rate", "totalHours")
+	Required("company_id", "dateFrom", "dateTo", "url", "comment", "rate", "totalHours")
 })
 
 var InvoiceMedia = MediaType("application/invoiceapi.invoiceentity", func() {
@@ -137,7 +133,6 @@ var InvoiceMedia = MediaType("application/invoiceapi.invoiceentity", func() {
 	Attributes(func() {
 		Attribute("id")
 		Attribute("company_id")
-		Attribute("title")
 		Attribute("dateFrom")
 		Attribute("dateTo")
 		Attribute("url")
@@ -146,13 +141,12 @@ var InvoiceMedia = MediaType("application/invoiceapi.invoiceentity", func() {
 		Attribute("totalHours")
 		Attribute("entries", CollectionOf(EntryMedia))
 
-		Required("id", "company_id", "title", "dateFrom", "dateTo", "url", "comment", "rate", "totalHours", "entries")
+		Required("id", "company_id", "dateFrom", "dateTo", "url", "comment", "rate", "totalHours", "entries")
 	})
 
 	View("default", func() {
 		Attribute("id")
 		Attribute("company_id")
-		Attribute("title")
 		Attribute("dateFrom")
 		Attribute("dateTo")
 		Attribute("url")

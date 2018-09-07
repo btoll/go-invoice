@@ -99,8 +99,8 @@ form > div:last-child input:last-child {
 #image form > div:last-child {
     margin-left: 0;
 }
-/* Invoice <select> element on Entry page */
-#invoiceSelection {
+/* Invoice <select> element on Invoice, Entry, etc. page */
+.itemSelection {
     margin: 20px 20px 20px 10px;
     padding: 0;
 }

@@ -21,7 +21,7 @@ import Views.Modal as Modal
 
 
 type alias Model =
-    { errors : List ( Validate.Company.Field, String )
+    { errors : List String
     , tableState : Table.State
     , action : Action
     , editing : Maybe Company
@@ -194,23 +194,20 @@ update url msg model =
                         Just company ->
                             Validate.Company.errors company
 
-                ( action, subCmd ) = if errors |> List.isEmpty then
+                subCmd = if errors |> List.isEmpty then
                     case model.editing of
                         Nothing ->
-                            ( None, Cmd.none )
+                            Cmd.none
 
                         Just company ->
-                            ( None
-                            , Request.Company.post url company
+                            Request.Company.post url company
                                 |> Http.toTask
                                 |> Task.attempt Posted
-                            )
                     else
-                        ( Adding, Cmd.none )
+                        Cmd.none
             in
                 { model |
-                    action = action
-                    , errors = errors
+                    errors = errors
                 } ! [ subCmd ]
 
         Posted ( Ok company ) ->
@@ -225,13 +222,23 @@ update url msg model =
                                 |> (::) { newCompany | id = company.id }
             in
             { model |
-                companies = companies
+                action = None
+                , companies = companies
                 , editing = Nothing
             } ! []
 
         Posted ( Err err ) ->
+            let
+                e =
+                    case err of
+                        Http.BadStatus e ->
+                            e.body
+
+                        _ ->
+                            "nop"
+            in
             { model |
-                editing = Nothing
+                errors = (::) e model.errors
             } ! []
 
         PrintPreview company ->
@@ -250,23 +257,20 @@ update url msg model =
                         Just company ->
                             Validate.Company.errors company
 
-                ( action, subCmd ) = if errors |> List.isEmpty then
+                subCmd = if errors |> List.isEmpty then
                     case model.editing of
                         Nothing ->
-                            ( None, Cmd.none )
+                            Cmd.none
 
                         Just company ->
-                            ( None
-                            , Request.Company.put url company
+                            Request.Company.put url company
                                 |> Http.toTask
                                 |> Task.attempt Putted
-                            )
                     else
-                        ( Adding, Cmd.none )
+                        Cmd.none
             in
                 { model |
-                    action = action
-                    , errors = errors
+                    errors = errors
                 } ! [ subCmd ]
 
         Putted ( Ok id ) ->
@@ -289,7 +293,8 @@ update url msg model =
                             company
             in
             { model |
-                companies =
+                action = None
+                , companies =
                     model.companies
                         |> List.filter ( \m -> newCompany.id /= m.id )
                         |> (::) newCompany
@@ -297,8 +302,17 @@ update url msg model =
             } ! []
 
         Putted ( Err err ) ->
+            let
+                e =
+                    case err of
+                        Http.BadStatus e ->
+                            e.body
+
+                        _ ->
+                            "nop"
+            in
             { model |
-                editing = Nothing
+                errors = (::) e model.errors
             } ! []
 
         SetFormValue setFormValue s ->

@@ -9,7 +9,7 @@ import Json.Encode as Encode
 
 type alias Invoice =
     { id : Int
-    , title : String
+    , company_id: Int
     , dateFrom : String
     , dateTo : String
     , url : String
@@ -23,7 +23,7 @@ type alias Invoice =
 new : Invoice
 new =
     { id = -1
-    , title = ""
+    , company_id = -1
     , dateFrom = ""
     , dateTo = ""
     , url = ""
@@ -38,7 +38,7 @@ decoder : Decoder Invoice
 decoder =
     decode Invoice
         |> required "id" int
-        |> optional "title" string ""
+        |> required "company_id" int
         |> required "dateFrom" string
         |> required "dateTo" string
         |> optional "url" string ""
@@ -57,7 +57,7 @@ encoder : Invoice -> Encode.Value
 encoder invoice =
     Encode.object
         [ ( "id", Encode.int invoice.id )
-        , ( "title", Encode.string invoice.title )
+        , ( "company_id", Encode.int invoice.company_id )
         , ( "dateFrom", Encode.string invoice.dateFrom )
         , ( "dateTo", Encode.string invoice.dateTo )
         , ( "url", Encode.string invoice.url )

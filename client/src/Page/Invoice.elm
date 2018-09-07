@@ -5,7 +5,7 @@ import Data.Invoice exposing (Invoice, new)
 import Date exposing (Date, Day(..), day, dayOfWeek, month, year)
 import DatePicker exposing (defaultSettings, DateEvent(..))
 import Html exposing (Html, Attribute, button, div, form, h1, input, label, node, section, text)
-import Html.Attributes exposing (action, autofocus, checked, disabled, for, id, style, type_, value)
+import Html.Attributes exposing (action, autofocus, checked, class, disabled, for, style, type_, value)
 import Html.Events exposing (onClick, onInput, onSubmit)
 import Html.Lazy exposing (lazy)
 import Http
@@ -26,7 +26,7 @@ import Views.Modal as Modal
 
 
 type alias Model =
-    { errors : List ( Validate.Invoice.Field, String )
+    { errors : List String
     , tableState : Table.State
     , action : Action
     , editing : Maybe Invoice
@@ -378,26 +378,24 @@ update url msg model =
                         Just invoice ->
                             Validate.Invoice.errors invoice
 
-                ( action, subCmd ) = if errors |> List.isEmpty then
+                subCmd = if errors |> List.isEmpty then
                     case model.editing of
                         Nothing ->
-                            ( Selected, Cmd.none )
+                            Cmd.none
 
                         Just invoice ->
-                            ( Selected
-                            , Request.Invoice.post url invoice
+                            { invoice | company_id = model.selectedCompanyID }
+                                |> Request.Invoice.post url
                                 |> Http.toTask
                                 |> Task.attempt Posted
-                            )
                     else
-                        ( Adding, Cmd.none )
+                        Cmd.none
             in
-                { model |
-                    action = action
-                    , startDate = Nothing
-                    , endDate = Nothing
-                    , errors = errors
-                } ! [ subCmd ]
+            { model |
+                startDate = Nothing
+                , endDate = Nothing
+                , errors = errors
+            } ! [ subCmd ]
 
         Posted ( Ok invoice ) ->
             let
@@ -411,13 +409,23 @@ update url msg model =
                                 |> (::) { newInvoice | id = invoice.id }
             in
             { model |
-                invoices = invoices
+                action = Selected
+                , invoices = invoices
                 , editing = Nothing
             } ! []
 
         Posted ( Err err ) ->
+            let
+                e =
+                    case err of
+                        Http.BadStatus e ->
+                            e.body
+
+                        _ ->
+                            "nop"
+            in
             { model |
-                editing = Nothing
+                errors = (::) e model.errors
             } ! []
 
         PrintPreview invoice ->
@@ -436,25 +444,20 @@ update url msg model =
                         Just invoice ->
                             Validate.Invoice.errors invoice
 
-                ( action, subCmd ) = if errors |> List.isEmpty then
+                subCmd = if errors |> List.isEmpty then
                     case model.editing of
                         Nothing ->
-                            ( Selected
-                            , Cmd.none
-                            )
+                            Cmd.none
 
                         Just invoice ->
-                            ( Selected
-                            , Request.Invoice.put url invoice
+                            Request.Invoice.put url invoice
                                 |> Http.toTask
                                 |> Task.attempt Putted
-                            )
                     else
-                        ( Adding, Cmd.none )
+                        Cmd.none
             in
                 { model |
-                    action = action
-                    , errors = errors
+                    errors = errors
                 } ! [ subCmd ]
 
         Putted ( Ok id ) ->
@@ -477,7 +480,8 @@ update url msg model =
                             invoice
             in
             { model |
-                invoices =
+                action = Selected
+                , invoices =
                     model.invoices
                         |> List.filter ( \m -> newInvoice.id /= m.id )
                         |> (::) newInvoice
@@ -485,8 +489,17 @@ update url msg model =
             } ! []
 
         Putted ( Err err ) ->
+            let
+                e =
+                    case err of
+                        Http.BadStatus e ->
+                            e.body
+
+                        _ ->
+                            "nop"
+            in
             { model |
-                editing = Nothing
+                errors = (::) e model.errors
             } ! []
 
         SetFormValue setFormValue s ->
@@ -507,12 +520,14 @@ update url msg model =
 
 
 
-
 -- VIEW
 
 
 view : Model -> Html Msg
 view model =
+    let
+        e = model.errors
+    in
     section []
         ( (++)
             [ h1 [] [ text "Invoices" ]
@@ -542,7 +557,7 @@ drawView model =
 
         selectCompany =
             Form.select "Company"
-                [ id "companySelection"
+                [ "itemSelection" |> class
                 , onInput CompanySelected
                 ]
                 ( model.companies |> options )
@@ -579,13 +594,7 @@ drawView model =
 
 formFields : Model -> Invoice -> List ( Html Msg )
 formFields model invoice =
-    [ Form.text "Title"
-        [ value invoice.title
-        , onInput ( SetFormValue ( \v -> { invoice | title = v } ) )
-        , autofocus True
-        ]
-        []
-    , div [] [
+    [ div [] [
         label [] [ text "Date From" ]
         , model.startDatePicker
             |> DatePicker.view model.startDate ( startSettings model.startDate )
@@ -632,8 +641,7 @@ config =
     { toId = .dateFrom
     , toMsg = SetTableState
     , columns =
-        [ Table.stringColumn "Title" .title
-        , Table.stringColumn "Date From" .dateFrom
+        [ Table.stringColumn "Date From" .dateFrom
         , Table.stringColumn "Date To" .dateTo
         , Table.stringColumn "URL" .url
         , Table.stringColumn "Comment" .comment

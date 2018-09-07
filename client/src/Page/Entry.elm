@@ -5,7 +5,7 @@ import Data.Invoice exposing (Invoice)
 import Date exposing (Date, Day(..), day, dayOfWeek, month, year)
 import DatePicker exposing (defaultSettings, DateEvent(..))
 import Html exposing (Html, Attribute, button, div, form, h1, input, label, node, section, text)
-import Html.Attributes exposing (action, autofocus, checked, disabled, for, id, style, type_, value)
+import Html.Attributes exposing (action, autofocus, checked, class, disabled, for, style, type_, value)
 import Html.Events exposing (onClick, onInput, onSubmit)
 import Html.Lazy exposing (lazy)
 import Http
@@ -26,7 +26,7 @@ import Views.Modal as Modal
 
 
 type alias Model =
-    { errors : List ( Validate.Entry.Field, String )
+    { errors : List String
     , tableState : Table.State
     , action : Action
     , editing : Maybe Entry
@@ -260,24 +260,21 @@ update url msg model =
                         Just invoice ->
                             Validate.Entry.errors invoice
 
-                ( action, subCmd ) = if errors |> List.isEmpty then
+                subCmd = if errors |> List.isEmpty then
                     case model.editing of
                         Nothing ->
-                            ( Selected, Cmd.none )
+                            Cmd.none
 
                         Just entry ->
-                            ( Selected
-                            , { entry | invoice_id = model.selectedInvoiceID }
+                            { entry | invoice_id = model.selectedInvoiceID }
                                 |> Request.Entry.post url
                                 |> Http.toTask
                                 |> Task.attempt Posted
-                            )
                     else
-                        ( Adding, Cmd.none )
+                        Cmd.none
             in
                 { model |
-                    action = action
-                    , date = Nothing
+                    date = Nothing
                     , errors = errors
                 } ! [ subCmd ]
 
@@ -293,13 +290,23 @@ update url msg model =
                                 |> (::) { newEntry | id = entry.id }
             in
             { model |
-                entries = entries
+                action = Selected
+                , entries = entries
                 , editing = Nothing
             } ! []
 
         Posted ( Err err ) ->
+            let
+                e =
+                    case err of
+                        Http.BadStatus e ->
+                            e.body
+
+                        _ ->
+                            "nop"
+            in
             { model |
-                editing = Nothing
+                errors = (::) e model.errors
             } ! []
 
         Put ->
@@ -312,25 +319,20 @@ update url msg model =
                         Just invoice ->
                             Validate.Entry.errors invoice
 
-                ( action, subCmd ) = if errors |> List.isEmpty then
+                subCmd = if errors |> List.isEmpty then
                     case model.editing of
                         Nothing ->
-                            ( Selected
-                            , Cmd.none
-                            )
+                            Cmd.none
 
                         Just entry ->
-                            ( Selected
-                            , Request.Entry.put url entry
+                            Request.Entry.put url entry
                                 |> Http.toTask
                                 |> Task.attempt Putted
-                            )
                     else
-                        ( Adding, Cmd.none )
+                        Cmd.none
             in
                 { model |
-                    action = action
-                    , errors = errors
+                    errors = errors
                 } ! [ subCmd ]
 
         Putted ( Ok id ) ->
@@ -353,7 +355,8 @@ update url msg model =
                             entry
             in
             { model |
-                entries =
+                action = Selected
+                , entries =
                     model.entries
                         |> List.filter ( \m -> newEntry.id /= m.id )
                         |> (::) newEntry
@@ -361,8 +364,17 @@ update url msg model =
             } ! []
 
         Putted ( Err err ) ->
+            let
+                e =
+                    case err of
+                        Http.BadStatus e ->
+                            e.body
+
+                        _ ->
+                            "nop"
+            in
             { model |
-                editing = Nothing
+                errors = (::) e model.errors
             } ! []
 
         SetFormValue setFormValue s ->
@@ -412,13 +424,13 @@ drawView model =
         options : List Invoice -> List ( Html Msg )
         options invoices =
             invoices
-                |> List.map ( \m -> ( m.id |> toString, m.title ++ " | " ++ m.dateFrom ++ " <> " ++ m.dateTo ) )
+                |> List.map ( \m -> ( m.id |> toString, ( m.company_id |> toString ) ++ " | " ++ m.dateFrom ++ " <> " ++ m.dateTo ) )
                 |> (::) ( "-1", "-- Select an invoice --" )
                 |> List.map ( model.selectedInvoiceID |> toString |> Form.option )
 
         selectInvoice =
             Form.select "Invoice"
-                [ id "invoiceSelection"
+                [ "itemSelection" |> class
                 , onInput InvoiceSelected
                 ]
                 ( model.invoices |> options )
