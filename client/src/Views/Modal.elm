@@ -1,6 +1,7 @@
 module Views.Modal exposing (Modal(..), Msg, update, view)
 
 import Data.Invoice exposing (Invoice, new)
+import Data.PrintPreview
 import Html exposing (Html, Attribute, button, div, text)
 import Html.Attributes exposing (id, style)
 import Html.Events exposing (onClick)
@@ -10,8 +11,8 @@ import Modal.PrintPreview as PrintPreview
 
 
 type Modal
-    = Delete ( Maybe Invoice )
-    | PrintPreview ( Maybe Invoice )
+    = Delete ( Maybe Data.PrintPreview.PrintPreview )
+    | PrintPreview ( Maybe Data.PrintPreview.PrintPreview )
 
 
 
@@ -31,8 +32,8 @@ update msg =
             PrintPreview.update subMsg
 
 
-view : Maybe Invoice -> ( Bool, Maybe Modal ) -> Html Msg
-view invoice modal =
+view : Maybe Data.PrintPreview.PrintPreview -> ( Bool, Maybe Modal ) -> Html Msg
+view printPreview modal =
     case modal of
         ( True, Just modal ) ->
             let
@@ -43,8 +44,8 @@ view invoice modal =
                             Delete.view
                                 |> Html.map DeleteMsg
 
-                        PrintPreview invoice ->
-                            Maybe.withDefault new invoice
+                        PrintPreview printPreview ->
+                            Maybe.withDefault Data.PrintPreview.newPrintPreview printPreview
                                 |> PrintPreview.view
                                 |> Html.map PrintPreviewMsg
             in

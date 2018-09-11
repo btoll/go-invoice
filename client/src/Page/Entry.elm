@@ -91,8 +91,8 @@ init url =
     , datePicker = datePicker
     , showModal = ( False, Nothing )
     } ! [ Cmd.map DatePicker datePickerFx
-        , "1"
-            |> Request.Invoice.get url
+        , "-1"
+            |> Request.Invoice.list url
             |> Http.send FetchedInvoice
         ]
 

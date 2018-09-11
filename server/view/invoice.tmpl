@@ -74,7 +74,7 @@ body {
         <div id="invoiceInfo" class="box">
             <p><span>Invoice Number:</span> </p>
             <p><span>Invoice Date:</span> {{ .CurrentDate }}</p>
-            <p><span>Invoice Hours:</span> {{ .TotalHours }}</p>
+            <p><span>Invoice Hours:</span> {{ .Invoice.TotalHours }}</p>
             <p><span>Invoice Amount:</span> ${{ .Amount }}</p>
         </div>
         <div id="from" class="box">
@@ -93,11 +93,11 @@ body {
 
     <div id="entries">
         <p id="period">
-            <span class="bold">Period - </span><span>{{ .DateFrom }}</span> // <span>{{ .DateTo }}</span>
+            <span class="bold">Period - </span><span>{{ .Invoice.DateFrom }}</span> // <span>{{ .Invoice.DateTo }}</span>
         </p>
         <h4>Work Description:</h4>
         <ul>
-            {{ with .Entries }}
+            {{ with .Invoice.Entries }}
             {{ range . }}
                 <li>
                     <span>{{ .Date }}, {{ .Hours }} hours {{ if .URL }} ({{ .URL }}) {{ end }}</span>

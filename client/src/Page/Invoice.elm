@@ -2,6 +2,7 @@ module Page.Invoice exposing (Model, Msg, init, update, view)
 
 import Data.Company exposing (Company)
 import Data.Invoice exposing (Invoice, new)
+import Data.PrintPreview
 import Date exposing (Date, Day(..), day, dayOfWeek, month, year)
 import DatePicker exposing (defaultSettings, DateEvent(..))
 import Html exposing (Html, Attribute, button, div, form, h1, input, label, node, section, text)
@@ -178,7 +179,7 @@ update url msg model =
                 , action = if (==) id -1 then None else Selected
             } !
                 [ company_id
-                    |> Request.Invoice.get url
+                    |> Request.Invoice.list url
                     |> Http.send FetchedInvoice
                 ]
 
@@ -429,9 +430,23 @@ update url msg model =
             } ! []
 
         PrintPreview invoice ->
+            let
+                getCompany companies =
+                    companies
+                        |> List.filter ( \company -> invoice.company_id |> (==) company.id )
+                        |> List.head
+                        |> Maybe.withDefault Data.Company.new
+            in
             { model |
                 editing = invoice |> Just
-                , showModal = ( True, invoice |> Just |> Modal.PrintPreview |> Just )
+                , showModal =
+                    ( True
+                    , invoice |>
+                        Data.PrintPreview.PrintPreview ( model.companies |> getCompany )
+                        |> Just
+                        |> Modal.PrintPreview
+                        |> Just
+                    )
             } ! []
 
         Put ->
@@ -585,7 +600,7 @@ drawView model =
 
         Selected ->
             [ selectCompany
-            , button [ onClick Add ] [ text "Add Entry" ]
+            , button [ onClick Add ] [ "Add Entry" |> text ]
             , Table.view config model.tableState model.invoices
             , model.showModal
                 |> Modal.view Nothing
@@ -595,13 +610,13 @@ drawView model =
 formFields : Model -> Invoice -> List ( Html Msg )
 formFields model invoice =
     [ div [] [
-        label [] [ text "Date From" ]
+        label [] [ "Date From" |> text ]
         , model.startDatePicker
             |> DatePicker.view model.startDate ( startSettings model.startDate )
             |> Html.map DatePickerStart
     ]
     , div [] [
-        label [] [ text "Date To" ]
+        label [] [ "Date To" |> text ]
         , model.endDatePicker
             |> DatePicker.view model.endDate ( endSettings model.endDate )
             |> Html.map DatePickerEnd

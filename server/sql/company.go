@@ -18,9 +18,9 @@ func NewCompany(payload interface{}) *Company {
 		Stmt: map[string]string{
 			"DELETE":  "DELETE FROM company WHERE id=?",
 			"GET_ONE": "SELECT * FROM company WHERE id=%d",
-			"INSERT":  "INSERT company SET dateFrom=?,dateTo=?,title=?,url=?,comment=?,rate=?,totalHours=?",
+			"INSERT":  "INSERT company SET name=?,contact=?,street1=?,street2=?,city=?,state=?,zip=?,url=?,comment=?",
 			"SELECT":  "SELECT %s FROM company",
-			"UPDATE":  "UPDATE company SET dateFrom=?,dateTo=?,title=?,url=?,comment=?,rate=?,totalHours=? WHERE id=?",
+			"UPDATE":  "UPDATE company SET name=?,contact=?,street1=?,street2=?,city=?,state=?,zip=?,url=?,comment=? WHERE id=?",
 		},
 	}
 }

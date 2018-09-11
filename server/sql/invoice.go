@@ -19,7 +19,7 @@ func NewInvoice(payload interface{}) *Invoice {
 			"DELETE":  "DELETE FROM invoice WHERE id=?",
 			"GET_ONE": "SELECT * FROM invoice WHERE id=%d",
 			"INSERT":  "INSERT invoice SET company_id=?,dateFrom=?,dateTo=?,url=?,comment=?,rate=?,totalHours=?",
-			"SELECT":  "SELECT %s FROM invoice",
+			"SELECT":  "SELECT %s FROM invoice %s",
 			"UPDATE":  "UPDATE invoice SET company_id=?,dateFrom=?,dateTo=?,url=?,comment=?,rate=?,totalHours=? WHERE id=?",
 		},
 	}
@@ -104,9 +104,19 @@ func (s *Invoice) Delete(db *mysql.DB) error {
 }
 
 func (s *Invoice) List(db *mysql.DB) (interface{}, error) {
-	rows, err := db.Query(fmt.Sprintf(s.Stmt["SELECT"], "COUNT(*)"))
-	if err != nil {
-		return nil, err
+	company_id := s.Data.(int)
+	var rows *mysql.Rows
+	var err error
+	if company_id == -1 {
+		rows, err = db.Query(fmt.Sprintf(s.Stmt["SELECT"], "COUNT(*)", ""))
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		rows, err = db.Query(fmt.Sprintf(s.Stmt["SELECT"], "COUNT(*)", fmt.Sprintf("WHERE company_id=%d", company_id)))
+		if err != nil {
+			return nil, err
+		}
 	}
 	var count int
 	for rows.Next() {
@@ -115,9 +125,16 @@ func (s *Invoice) List(db *mysql.DB) (interface{}, error) {
 			return nil, err
 		}
 	}
-	rows, err = db.Query(fmt.Sprintf(s.Stmt["SELECT"], "*"))
-	if err != nil {
-		return nil, err
+	if company_id == -1 {
+		rows, err = db.Query(fmt.Sprintf(s.Stmt["SELECT"], "*", ""))
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		rows, err = db.Query(fmt.Sprintf(s.Stmt["SELECT"], "*", fmt.Sprintf("WHERE company_id=%d", company_id)))
+		if err != nil {
+			return nil, err
+		}
 	}
 	coll := make(app.InvoiceMediaCollection, count)
 	i := 0

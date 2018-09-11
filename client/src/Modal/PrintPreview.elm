@@ -1,9 +1,10 @@
 module Modal.PrintPreview exposing (Msg, update, view)
 
 import Data.Entry exposing (Entry)
+import Data.PrintPreview exposing (PrintPreview)
 import Data.Invoice exposing (Invoice)
 import Html exposing (Html, button, div, h1, h4, li, p, span, table, tr, td, text, ul)
-import Html.Attributes exposing (class, id)
+import Html.Attributes exposing (class, hidden, id)
 import Html.Events exposing (onClick)
 
 
@@ -11,6 +12,7 @@ import Html.Events exposing (onClick)
 type Msg
     = Close
     | Export
+
 
 
 rowLine : Entry -> String
@@ -41,17 +43,17 @@ entryItem entry =
     ]
 
 
-printPreview : Invoice -> Html Msg
-printPreview invoice =
+printPreview : PrintPreview -> Html Msg
+printPreview previewData =
     div [] [
         div [ "header" |> id ] [
             div [ "invoiceInfo" |> id, "box" |> class ] [
                 p [] [ span [] [ "Invoice Number: " |> text ], "" |> text ]
                 , p [] [ span [] [ "Invoice Date: " |> text ], "" |> text ]
-                , p [] [ span [] [ "Invoice Hours: " |> text ], ( invoice.totalHours |> toString ) |> text ]
+                , p [] [ span [] [ "Invoice Hours: " |> text ], ( previewData.invoice.totalHours |> toString ) |> text ]
                 , p [] [ span [] [ "Invoice Amount: $" |> text ]
                     , (
-                        invoice.rate |> (*) invoice.totalHours
+                        previewData.invoice.rate |> (*) previewData.invoice.totalHours
                             |> toString
                         ) |> text
                     ]
@@ -64,21 +66,32 @@ printPreview invoice =
             ]
             , div [ "to" |> id, "box" |> class ] [
                 h4 [] [ "Bill To:" |> text ]
-                , p [] [ "Benjamin Toll" |> text ]
-                , p [] [ "113 Old Colony Road" |> text ]
-                , p [] [ "Princeton, MA 01541" |> text ]
+                , p [] [ previewData.company.name |> text ]
+                , p [] [ previewData.company.contact |> text ]
+                , p [] [ previewData.company.street1 |> text ]
+                , if "" |> (==) previewData.company.street2
+                  then p [ True |> hidden ] []
+                  else p [] [ previewData.company.street2 |> text ]
+                , p [] [
+                    (
+                        ( ", " |> (++) previewData.company.city )
+                        ++ (
+                            " " |> (++) previewData.company.state
+                            )
+                        ++ previewData.company.zip
+                    ) |> text ]
             ]
         ]
         , div [ "entries" |> id ] [
             p [ "period" |> id ] [
                 span ["bold" |> class ] [ "Period - " |> text ]
-                , span [] [ invoice.dateFrom |> text ]
+                , span [] [ previewData.invoice.dateFrom |> text ]
                 , span [] [ " // " |> text]
-                , span [] [ invoice.dateTo |> text ]
+                , span [] [ previewData.invoice.dateTo |> text ]
             ]
             , h4 [] [ "Work Description" |> text ]
             , ul []
-            ( invoice.entries |> List.map entryItem )
+            ( previewData.invoice.entries |> List.map entryItem )
         ]
         , div [ "footer" |> id ] [
             p [] [ "Please pay upon receipt." |> text ]
@@ -99,10 +112,10 @@ update msg =
 
 
 
-view : Invoice -> Html Msg
-view invoice =
+view : PrintPreview -> Html Msg
+view previewData =
     div [ "printPreview" |> id ] [
-        invoice |> printPreview
+        previewData |> printPreview
         , button [ onClick Export ] [ text "Export as HTML" ]
         , button [ onClick Close ] [ text "Close" ]
         ]

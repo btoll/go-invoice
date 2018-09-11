@@ -54,7 +54,7 @@ func (c *InvoiceController) Delete(ctx *app.DeleteInvoiceContext) error {
 func (c *InvoiceController) List(ctx *app.ListInvoiceContext) error {
 	// InvoiceController_List: start_implement
 
-	collection, err := sql.List(sql.NewInvoice(nil))
+	collection, err := sql.List(sql.NewInvoice(ctx.CompanyID))
 	if err != nil {
 		return ctx.BadRequest(goa.ErrInternal(err, "endpoint", "list"))
 	}
@@ -74,17 +74,20 @@ func (c *InvoiceController) Export(ctx *app.ExportInvoiceContext) error {
 	if err != nil {
 		return goa.ErrInternal(err, "endpoint", "export")
 	}
+	// TODO: Get company!
 	row := rec.(*app.InvoiceMedia)
 	current_time := time.Now().Local()
 	inv := view.Invoice{
-		ID:          row.ID,
 		CurrentDate: current_time.Format("01/02/2006"),
-		TotalHours:  row.TotalHours,
 		Amount:      row.Rate * row.TotalHours,
-		DateFrom:    row.DateFrom,
-		DateTo:      row.DateTo,
-		Rate:        row.Rate,
-		Entries:     entries.(app.EntryMediaCollection),
+		Invoice: &app.InvoiceMedia{
+			ID:         row.ID,
+			TotalHours: row.TotalHours,
+			DateFrom:   row.DateFrom,
+			DateTo:     row.DateTo,
+			Rate:       row.Rate,
+			Entries:    entries.(app.EntryMediaCollection),
+		},
 	}
 	f, err := os.Create("invoices/foo.html")
 	if err != nil {
