@@ -11,7 +11,7 @@ type alias Entry =
     , invoice_id : Int      -- Foreign key.
     , title : String
     , date : String
-    , url : String
+    , reference : String
     , comment : String
     , hours : Float
     }
@@ -23,7 +23,7 @@ new =
     , invoice_id = -1
     , title = ""
     , date = ""
-    , url = ""
+    , reference = ""
     , comment = ""
     , hours = 0.00
     }
@@ -36,7 +36,7 @@ decoder =
         |> required "invoice_id" int
         |> optional "title" string ""
         |> required "date" string
-        |> optional "url" string ""
+        |> optional "reference" string ""
         |> optional "comment" string ""
         |> optional "hours" float 0.00
 
@@ -53,7 +53,7 @@ encoder entry =
         , ( "invoice_id", Encode.int entry.invoice_id )
         , ( "title", Encode.string entry.title )
         , ( "date", Encode.string entry.date )
-        , ( "url", Encode.string entry.url )
+        , ( "reference", Encode.string entry.reference )
         , ( "comment", Encode.string entry.comment )
         , ( "hours", Encode.float entry.hours )
         ]

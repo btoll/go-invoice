@@ -100,7 +100,7 @@ body {
             {{ with .Invoice.Entries }}
             {{ range . }}
                 <li>
-                    <span>{{ .Date }}, {{ .Hours }} hours {{ if .URL }} ({{ .URL }}) {{ end }}</span>
+                    <span>{{ .Date }}, {{ .Hours }} hours {{ if .Reference }} ({{.Reference}}) {{ end }}</span>
                     <table>
                         <tr>
                             <td class="bold">{{ .Title }}</td>

@@ -79,9 +79,9 @@ var EntryPayload = Type("EntryPayload", func() {
 		Metadata("struct:tag:datastore", "date,noindex")
 		Metadata("struct:tag:json", "date")
 	})
-	Attribute("url", String, "Entry url", func() {
-		Metadata("struct:tag:datastore", "url,noindex")
-		Metadata("struct:tag:json", "url")
+	Attribute("reference", String, "Entry reference", func() {
+		Metadata("struct:tag:datastore", "reference,noindex")
+		Metadata("struct:tag:json", "reference")
 	})
 	Attribute("comment", String, "Entry comment", func() {
 		Metadata("struct:tag:datastore", "comment,noindex")
@@ -92,7 +92,7 @@ var EntryPayload = Type("EntryPayload", func() {
 		Metadata("struct:tag:json", "hours")
 	})
 
-	Required("invoice_id", "title", "date", "url", "comment", "hours")
+	Required("invoice_id", "title", "date", "reference", "comment", "hours")
 })
 
 var EntryMedia = MediaType("application/entryapi.entryentity", func() {
@@ -106,11 +106,11 @@ var EntryMedia = MediaType("application/entryapi.entryentity", func() {
 		Attribute("invoice_id")
 		Attribute("title")
 		Attribute("date")
-		Attribute("url")
+		Attribute("reference")
 		Attribute("comment")
 		Attribute("hours")
 
-		Required("id", "invoice_id", "title", "date", "url", "comment", "hours")
+		Required("id", "invoice_id", "title", "date", "reference", "comment", "hours")
 	})
 
 	View("default", func() {
@@ -118,7 +118,7 @@ var EntryMedia = MediaType("application/entryapi.entryentity", func() {
 		Attribute("invoice_id")
 		Attribute("title")
 		Attribute("date")
-		Attribute("url")
+		Attribute("reference")
 		Attribute("comment")
 		Attribute("hours")
 	})

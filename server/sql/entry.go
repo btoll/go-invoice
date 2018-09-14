@@ -17,9 +17,9 @@ func NewEntry(payload interface{}) *Entry {
 		Data: payload,
 		Stmt: map[string]string{
 			"DELETE": "DELETE FROM entry WHERE id=?",
-			"INSERT": "INSERT entry SET invoice_id=?,date=?,title=?,url=?,comment=?,hours=?",
+			"INSERT": "INSERT entry SET invoice_id=?,date=?,title=?,reference=?,comment=?,hours=?",
 			"SELECT": "SELECT %s FROM entry WHERE invoice_id=%d ORDER BY date ASC",
-			"UPDATE": "UPDATE entry SET invoice_id=?,date=?,title=?,url=?,comment=?,hours=? WHERE id=?",
+			"UPDATE": "UPDATE entry SET invoice_id=?,date=?,title=?,reference=?,comment=?,hours=? WHERE id=?",
 		},
 	}
 }
@@ -30,7 +30,7 @@ func (s *Entry) Create(db *mysql.DB) (interface{}, error) {
 	if err != nil {
 		return -1, err
 	}
-	res, err := stmt.Exec(payload.InvoiceID, payload.Date, payload.Title, payload.URL, payload.Comment, payload.Hours)
+	res, err := stmt.Exec(payload.InvoiceID, payload.Date, payload.Title, payload.Reference, payload.Comment, payload.Hours)
 	if err != nil {
 		return -1, err
 	}
@@ -43,7 +43,7 @@ func (s *Entry) Create(db *mysql.DB) (interface{}, error) {
 		InvoiceID: payload.InvoiceID,
 		Date:      payload.Date,
 		Title:     payload.Title,
-		URL:       payload.URL,
+		Reference: payload.Reference,
 		Comment:   payload.Comment,
 		Hours:     payload.Hours,
 	}, nil
@@ -59,7 +59,7 @@ func (s *Entry) Update(db *mysql.DB) error {
 	if err != nil {
 		return err
 	}
-	_, err = stmt.Exec(payload.InvoiceID, payload.Date, payload.Title, payload.URL, payload.Comment, payload.Hours, payload.ID)
+	_, err = stmt.Exec(payload.InvoiceID, payload.Date, payload.Title, payload.Reference, payload.Comment, payload.Hours, payload.ID)
 	return err
 }
 
@@ -97,10 +97,10 @@ func (s *Entry) List(db *mysql.DB) (interface{}, error) {
 		var invoice_id int
 		var title string
 		var date string
-		var url string
+		var reference string
 		var comment string
 		var hours float64
-		err = rows.Scan(&id, &invoice_id, &title, &date, &url, &comment, &hours)
+		err = rows.Scan(&id, &invoice_id, &title, &date, &reference, &comment, &hours)
 		if err != nil {
 			return nil, err
 		}
@@ -109,7 +109,7 @@ func (s *Entry) List(db *mysql.DB) (interface{}, error) {
 			InvoiceID: invoice_id,
 			Title:     title,
 			Date:      date,
-			URL:       url,
+			Reference: reference,
 			Comment:   comment,
 			Hours:     hours,
 		}

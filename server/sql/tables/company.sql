@@ -17,9 +17,3 @@ CREATE TABLE `company` (
   KEY `ID` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
 
-LOCK TABLES `company` WRITE;
-/*!40000 ALTER TABLE `company` DISABLE KEYS */;
-INSERT INTO `company` VALUES (1,'CoreConnex','Frank Coker','10900 NE 9th Street','Suite 2300','Bellevue','WA','98004','https://www.coreconnex.com','');
-/*!40000 ALTER TABLE `company` ENABLE KEYS */;
-UNLOCK TABLES;
-

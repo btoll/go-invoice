@@ -475,9 +475,11 @@ formFields model entry =
         , DatePicker.view model.date ( settings model.date ) model.datePicker
             |> Html.map DatePicker
     ]
-    , Form.text "URL"
-        [ value entry.url
-        , onInput ( SetFormValue ( \v -> { entry | url = v } ) )
+    , Form.textarea "Reference"
+        [ value entry.reference
+        , onInput ( SetFormValue ( \v -> { entry | reference = v } ) )
+        , 80 |> cols
+        , 5 |> rows
         ]
         []
     , Form.textarea "Comment"
@@ -509,7 +511,7 @@ config =
     , columns =
         [ Table.stringColumn "Title" .title
         , Table.stringColumn "Date" .date
-        , Table.stringColumn "URL" .url
+        , Table.stringColumn "Reference" .reference
         , Table.stringColumn "Comment" .comment
         , Table.floatColumn "Hours" .hours
         , customColumn "" ( viewButton Edit "Edit" )

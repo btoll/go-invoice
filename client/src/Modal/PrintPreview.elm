@@ -23,8 +23,8 @@ rowLine entry =
             |> (++) ( entry.hours |> toString )
         )
     ++ (
-        if  (/=) entry.url ""
-        then (++) ", " entry.url
+        if  (/=) entry.reference ""
+        then (++) ", " entry.reference
         else ""
     )
 
