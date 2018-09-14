@@ -453,8 +453,8 @@ config =
         , Table.stringColumn "Comment" .comment
         , customColumn "" ( viewButton Edit "Edit" )
         , customColumn "" ( viewButton Delete "Delete" )
-        , customColumn "" ( viewButton PrintPreview "Print Preview" )
-        , customColumn "" ( viewButton Export "Export" )
+--        , customColumn "" ( viewButton PrintPreview "Print Preview" )
+--        , customColumn "" ( viewButton Export "Export" )
         ]
     , customizations =
         { defaultCustomizations | rowAttrs = toRowAttrs }

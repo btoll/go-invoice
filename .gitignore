@@ -17,3 +17,6 @@ exclude-from.txt
 # The binary build artifact.
 server/go-invoice
 
+invoices/
+*dump.sql
+

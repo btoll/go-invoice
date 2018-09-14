@@ -18,7 +18,7 @@ func NewEntry(payload interface{}) *Entry {
 		Stmt: map[string]string{
 			"DELETE": "DELETE FROM entry WHERE id=?",
 			"INSERT": "INSERT entry SET invoice_id=?,date=?,title=?,url=?,comment=?,hours=?",
-			"SELECT": "SELECT %s FROM entry WHERE invoice_id=%d",
+			"SELECT": "SELECT %s FROM entry WHERE invoice_id=%d ORDER BY date ASC",
 			"UPDATE": "UPDATE entry SET invoice_id=?,date=?,title=?,url=?,comment=?,hours=? WHERE id=?",
 		},
 	}

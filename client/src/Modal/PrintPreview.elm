@@ -3,7 +3,7 @@ module Modal.PrintPreview exposing (Msg, update, view)
 import Data.Entry exposing (Entry)
 import Data.PrintPreview exposing (PrintPreview)
 import Data.Invoice exposing (Invoice)
-import Html exposing (Html, button, div, h1, h4, li, p, span, table, tr, td, text, ul)
+import Html exposing (Html, button, div, h1, h4, li, p, pre, span, table, tr, td, text, ul)
 import Html.Attributes exposing (class, hidden, id)
 import Html.Events exposing (onClick)
 
@@ -37,7 +37,9 @@ entryItem entry =
                 td [ "bold" |> class ] [ entry.title |> text ]
             ]
             , tr [] [
-                td [] [ entry.comment |> text ]
+                td [] [
+                    pre [] [ entry.comment |> text ]
+                    ]
             ]
         ]
     ]

@@ -6,7 +6,7 @@ import Data.PrintPreview
 import Date exposing (Date, Day(..), day, dayOfWeek, month, year)
 import DatePicker exposing (defaultSettings, DateEvent(..))
 import Html exposing (Html, Attribute, button, div, form, h1, input, label, node, section, text)
-import Html.Attributes exposing (action, autofocus, checked, class, disabled, for, style, type_, value)
+import Html.Attributes exposing (action, autofocus, checked, class, cols, disabled, for, rows, style, type_, value)
 import Html.Events exposing (onClick, onInput, onSubmit)
 import Html.Lazy exposing (lazy)
 import Http
@@ -629,6 +629,8 @@ formFields model invoice =
     , Form.textarea "Comment"
         [ value invoice.comment
         , onInput ( SetFormValue ( \v -> { invoice | comment = v } ) )
+        , 80 |> cols
+        , 20 |> rows
         ]
         []
     , Form.float "Rate"
