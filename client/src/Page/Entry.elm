@@ -476,10 +476,10 @@ formFields model entry =
             |> Html.map DatePicker
     ]
     , Form.textarea "Reference"
-        [ value entry.reference
-        , onInput ( SetFormValue ( \v -> { entry | reference = v } ) )
-        , 80 |> cols
-        , 5 |> rows
+        [ value ( entry.reference |> String.join ", " )
+        , onInput ( SetFormValue ( \v -> { entry | reference = ( v |> String.split "," ) } ) )
+--        , 80 |> cols
+--        , 5 |> rows
         ]
         []
     , Form.textarea "Comment"
@@ -511,7 +511,7 @@ config =
     , columns =
         [ Table.stringColumn "Title" .title
         , Table.stringColumn "Date" .date
-        , Table.stringColumn "Reference" .reference
+        , Table.stringColumn "Reference" ( .reference >> List.foldl (++) "" )
         , Table.stringColumn "Comment" .comment
         , Table.floatColumn "Hours" .hours
         , customColumn "" ( viewButton Edit "Edit" )

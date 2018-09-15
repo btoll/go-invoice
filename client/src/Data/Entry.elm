@@ -11,7 +11,7 @@ type alias Entry =
     , invoice_id : Int      -- Foreign key.
     , title : String
     , date : String
-    , reference : String
+    , reference : List String
     , comment : String
     , hours : Float
     }
@@ -23,7 +23,7 @@ new =
     , invoice_id = -1
     , title = ""
     , date = ""
-    , reference = ""
+    , reference = []
     , comment = ""
     , hours = 0.00
     }
@@ -36,7 +36,7 @@ decoder =
         |> required "invoice_id" int
         |> optional "title" string ""
         |> required "date" string
-        |> optional "reference" string ""
+        |> optional "reference" ( string |> Decode.list ) []
         |> optional "comment" string ""
         |> optional "hours" float 0.00
 
@@ -49,14 +49,21 @@ manyDecoder =
 encoder : Entry -> Encode.Value
 encoder entry =
     Encode.object
-        [ ( "id", Encode.int entry.id )
-        , ( "invoice_id", Encode.int entry.invoice_id )
-        , ( "title", Encode.string entry.title )
-        , ( "date", Encode.string entry.date )
-        , ( "reference", Encode.string entry.reference )
-        , ( "comment", Encode.string entry.comment )
-        , ( "hours", Encode.float entry.hours )
+        [ ( "id",  entry.id |> Encode.int )
+        , ( "invoice_id", entry.invoice_id |> Encode.int )
+        , ( "title", entry.title |> Encode.string )
+        , ( "date", entry.date |> Encode.string )
+        , ( "reference", entry.reference |> manyReferencesEncoder >> Encode.list )
+        , ( "comment", entry.comment |> Encode.string )
+        , ( "hours", entry.hours |> Encode.float )
         ]
+
+
+manyReferencesEncoder : List String -> List Encode.Value
+manyReferencesEncoder references =
+    references
+        |> List.map Encode.string
+
 
 succeed : a -> Decoder a
 succeed =

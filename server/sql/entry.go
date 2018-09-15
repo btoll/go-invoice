@@ -3,6 +3,7 @@ package sql
 import (
 	mysql "database/sql"
 	"fmt"
+	"strings"
 
 	"github.com/btoll/go-invoice/server/app"
 )
@@ -59,7 +60,7 @@ func (s *Entry) Update(db *mysql.DB) error {
 	if err != nil {
 		return err
 	}
-	_, err = stmt.Exec(payload.InvoiceID, payload.Date, payload.Title, payload.Reference, payload.Comment, payload.Hours, payload.ID)
+	_, err = stmt.Exec(payload.InvoiceID, payload.Date, payload.Title, strings.Join(payload.Reference, ""), payload.Comment, payload.Hours, payload.ID)
 	return err
 }
 
@@ -109,7 +110,7 @@ func (s *Entry) List(db *mysql.DB) (interface{}, error) {
 			InvoiceID: invoice_id,
 			Title:     title,
 			Date:      date,
-			Reference: reference,
+			Reference: strings.Fields(reference),
 			Comment:   comment,
 			Hours:     hours,
 		}

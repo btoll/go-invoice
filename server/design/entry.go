@@ -79,7 +79,7 @@ var EntryPayload = Type("EntryPayload", func() {
 		Metadata("struct:tag:datastore", "date,noindex")
 		Metadata("struct:tag:json", "date")
 	})
-	Attribute("reference", String, "Entry reference", func() {
+	Attribute("reference", ArrayOf(String), "Entry reference", func() {
 		Metadata("struct:tag:datastore", "reference,noindex")
 		Metadata("struct:tag:json", "reference")
 	})
@@ -106,7 +106,7 @@ var EntryMedia = MediaType("application/entryapi.entryentity", func() {
 		Attribute("invoice_id")
 		Attribute("title")
 		Attribute("date")
-		Attribute("reference")
+		Attribute("reference", ArrayOf(String))
 		Attribute("comment")
 		Attribute("hours")
 

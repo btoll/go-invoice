@@ -3,8 +3,8 @@ module Modal.PrintPreview exposing (Msg, update, view)
 import Data.Entry exposing (Entry)
 import Data.PrintPreview exposing (PrintPreview)
 import Data.Invoice exposing (Invoice)
-import Html exposing (Html, button, div, h1, h4, li, p, pre, span, table, tr, td, text, ul)
-import Html.Attributes exposing (class, hidden, id)
+import Html exposing (Html, a, button, div, h1, h4, li, p, pre, span, table, tr, td, text, ul)
+import Html.Attributes exposing (class, hidden, href, id, target)
 import Html.Events exposing (onClick)
 
 
@@ -15,23 +15,31 @@ type Msg
 
 
 
-rowLine : Entry -> String
+rowLine : Entry -> Html Msg
 rowLine entry =
-    ( (++) entry.date ", " )
-    ++ (
-        " hours"
-            |> (++) ( entry.hours |> toString )
+    div [] [
+        span [] [ entry.date |> text ]
+        , span [] [ ( " hours" |> (++) ( entry.hours |> toString ) ) |> text ]
+        , (
+            if entry.reference |> List.isEmpty
+            then ul [ True |> hidden ] []
+            else
+                entry.reference
+                    |> List.map (
+                        \ref ->
+                            li [] [
+                                a [ ref |> href, "_blank" |> target ] [ ref |> text ]
+                                ]
+                        )
+                    |> ul []
         )
-    ++ (
-        if  (/=) entry.reference ""
-        then (++) ", " entry.reference
-        else ""
-    )
+    ]
+
 
 entryItem : Entry -> Html Msg
 entryItem entry =
     li [] [
-        span [] [ entry |> rowLine |> text ]
+        entry |> rowLine
         , table [] [
             tr [] [
                 td [ "bold" |> class ] [ entry.title |> text ]
