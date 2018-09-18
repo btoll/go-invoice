@@ -32,17 +32,24 @@
 #entries li {
     margin: 20px 0;
 }
-
-/* Override table styles set in global `site.css` */
-#entries table {
-    border-collapse: separate;
-    margin: 0;
+.entryItems li {
+    background-color: #eee;
+    border-radius: 10px;
+    padding: 20px;
 }
-#entries td {
+.entryItems pre {
+    white-space: pre-wrap;
+}
+.entryItemHeader span {
+    font-weight: bold;
+}
+.entryItemHeader span + span {
+    margin-left: 20px;
+}
+.entryItemHeader li {
+    margin: 0;
     padding: 0;
 }
-/**/
-
 #period {
     border-top: 1px solid #000;
     border-bottom: 1px solid #000;

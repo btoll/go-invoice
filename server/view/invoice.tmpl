@@ -42,17 +42,24 @@ body {
 #entries li {
     margin: 20px 0;
 }
-
-/* Override table styles set in global `site.css` */
-#entries table {
-    border-collapse: separate;
-    margin: 0;
+.entryItems li {
+    background-color: #eee;
+    border-radius: 10px;
+    padding: 20px;
 }
-#entries td {
+.entryItems pre {
+    white-space: pre-wrap;
+}
+.entryItemHeader span {
+    font-weight: bold;
+}
+.entryItemHeader span + span {
+    margin-left: 20px;
+}
+.entryItemHeader li {
+    margin: 0;
     padding: 0;
 }
-/**/
-
 #period {
     border-top: 1px solid #000;
     border-bottom: 1px solid #000;
@@ -96,21 +103,20 @@ body {
             <span class="bold">Period - </span><span>{{ .Invoice.DateFrom }}</span> // <span>{{ .Invoice.DateTo }}</span>
         </p>
         <h4>Work Description:</h4>
-        <ul>
+        <ul class="entryItems">
             {{ with .Invoice.Entries }}
             {{ range . }}
                 <li>
-                    <span>{{ .Date }}, {{ .Hours }} hours {{ if .Reference }} ({{.Reference}}) {{ end }}</span>
-                    <table>
-                        <tr>
-                            <td class="bold">{{ .Title }}</td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <pre>{{ .Comment }}</pre>
-                            </td>
-                        </tr>
-                    </table>
+                    <div>
+                        <span>{{ .Date }}</span>
+                        <span>{{ .Hours }} hours</span>
+                    </div>
+                    <div>
+                        <p class="bold">{{ .Title }}</p>
+                        <div>
+                            <pre>{{ .Comment }}</pre>
+                        </div>
+                    </div>
                 </li>
             {{ end }}
             {{ end }}

@@ -3,8 +3,8 @@ module Modal.PrintPreview exposing (Msg, update, view)
 import Data.Entry exposing (Entry)
 import Data.PrintPreview exposing (PrintPreview)
 import Data.Invoice exposing (Invoice)
-import Html exposing (Html, a, button, div, h1, h4, li, p, pre, span, table, tr, td, text, ul)
-import Html.Attributes exposing (class, hidden, href, id, target)
+import Html exposing (Html, a, button, div, h1, h4, li, p, pre, span, text, ul)
+import Html.Attributes exposing (class, hidden, href, id, style, target)
 import Html.Events exposing (onClick)
 
 
@@ -15,9 +15,9 @@ type Msg
 
 
 
-rowLine : Entry -> Html Msg
-rowLine entry =
-    div [] [
+entryItemHeader : Entry -> Html Msg
+entryItemHeader entry =
+    div [ "entryItemHeader" |> class ] [
         span [] [ entry.date |> text ]
         , span [] [ ( " hours" |> (++) ( entry.hours |> toString ) ) |> text ]
         , (
@@ -39,15 +39,11 @@ rowLine entry =
 entryItem : Entry -> Html Msg
 entryItem entry =
     li [] [
-        entry |> rowLine
-        , table [] [
-            tr [] [
-                td [ "bold" |> class ] [ entry.title |> text ]
-            ]
-            , tr [] [
-                td [] [
-                    pre [] [ entry.comment |> text ]
-                    ]
+        entry |> entryItemHeader
+        , div [] [
+            p [ "bold" |> class ] [ entry.title |> text ]
+            , div [] [
+                pre [] [ entry.comment |> text ]
             ]
         ]
     ]
@@ -100,7 +96,7 @@ printPreview previewData =
                 , span [] [ previewData.invoice.dateTo |> text ]
             ]
             , h4 [] [ "Work Description" |> text ]
-            , ul []
+            , ul [ "entryItems" |> class ]
             ( previewData.invoice.entries |> List.map entryItem )
         ]
         , div [ "footer" |> id ] [

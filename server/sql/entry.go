@@ -31,7 +31,7 @@ func (s *Entry) Create(db *mysql.DB) (interface{}, error) {
 	if err != nil {
 		return -1, err
 	}
-	res, err := stmt.Exec(payload.InvoiceID, payload.Date, payload.Title, payload.Reference, payload.Comment, payload.Hours)
+	res, err := stmt.Exec(payload.InvoiceID, payload.Date, payload.Title, strings.Join(payload.Reference, ""), payload.Comment, payload.Hours)
 	if err != nil {
 		return -1, err
 	}
