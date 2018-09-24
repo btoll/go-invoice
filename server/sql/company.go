@@ -70,7 +70,7 @@ func (s *Company) Read(db *mysql.DB) (interface{}, error) {
 		var zip string
 		var url string
 		var comment string
-		err = rows.Scan(&id, &name, &contact, &street1, &street1, &city, &state, &zip, &url, &comment)
+		err = rows.Scan(&id, &name, &contact, &street1, &street2, &city, &state, &zip, &url, &comment)
 		if err != nil {
 			return nil, err
 		}

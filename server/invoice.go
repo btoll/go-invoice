@@ -74,20 +74,18 @@ func (c *InvoiceController) Export(ctx *app.ExportInvoiceContext) error {
 	if err != nil {
 		return goa.ErrInternal(err, "endpoint", "export")
 	}
-	// TODO: Get company!
 	row := rec.(*app.InvoiceMedia)
+	row.Entries = entries.(app.EntryMediaCollection)
+	company, err := sql.Read(sql.NewCompany(row.CompanyID))
+	if err != nil {
+		return goa.ErrInternal(err, "endpoint", "export")
+	}
 	current_time := time.Now().Local()
 	inv := view.Invoice{
 		CurrentDate: current_time.Format("01/02/2006"),
 		Amount:      row.Rate * row.TotalHours,
-		Invoice: &app.InvoiceMedia{
-			ID:         row.ID,
-			TotalHours: row.TotalHours,
-			DateFrom:   row.DateFrom,
-			DateTo:     row.DateTo,
-			Rate:       row.Rate,
-			Entries:    entries.(app.EntryMediaCollection),
-		},
+		Company:     company.(*app.CompanyMedia),
+		Invoice:     row,
 	}
 	f, err := os.Create("invoices/foo.html")
 	if err != nil {

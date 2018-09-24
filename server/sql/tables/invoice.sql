@@ -11,7 +11,6 @@ CREATE TABLE `invoice` (
   `url` varchar(255),
   `comment` text,
   `rate` FLOAT DEFAULT 0.0,
-  `totalHours` FLOAT DEFAULT 0.0,
   PRIMARY KEY (`id`),
   KEY `ID` (`id`),
   CONSTRAINT `fkcompany_id` FOREIGN KEY (`company_id`) REFERENCES `company` (`id`) ON DELETE CASCADE

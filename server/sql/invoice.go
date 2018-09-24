@@ -16,13 +16,29 @@ func NewInvoice(payload interface{}) *Invoice {
 	return &Invoice{
 		Data: payload,
 		Stmt: map[string]string{
-			"DELETE":  "DELETE FROM invoice WHERE id=?",
-			"GET_ONE": "SELECT * FROM invoice WHERE id=%d",
-			"INSERT":  "INSERT invoice SET company_id=?,dateFrom=?,dateTo=?,url=?,comment=?,rate=?,totalHours=?",
-			"SELECT":  "SELECT %s FROM invoice %s ORDER BY dateFrom DESC",
-			"UPDATE":  "UPDATE invoice SET company_id=?,dateFrom=?,dateTo=?,url=?,comment=?,rate=?,totalHours=? WHERE id=?",
+			"DELETE":             "DELETE FROM invoice WHERE id=?",
+			"GET_ONE":            "SELECT * FROM invoice WHERE id=%d",
+			"INSERT":             "INSERT invoice SET company_id=?,dateFrom=?,dateTo=?,url=?,comment=?,rate=?",
+			"SELECT":             "SELECT %s FROM invoice %s ORDER BY dateFrom DESC",
+			"SELECT_TOTAL_HOURS": "SELECT SUM(entry.hours) AS totalHours FROM invoice JOIN entry ON entry.invoice_id=invoice.id WHERE invoice.id=%d",
+			"UPDATE":             "UPDATE invoice SET company_id=?,dateFrom=?,dateTo=?,url=?,comment=?,rate=? WHERE id=?",
 		},
 	}
+}
+
+func (s *Invoice) GetTotalHours(db *mysql.DB, invoice_id int) (float64, error) {
+	rows, err := db.Query(fmt.Sprintf(s.Stmt["SELECT_TOTAL_HOURS"], invoice_id))
+	if err != nil {
+		return 0, err
+	}
+	var total_hours float64
+	for rows.Next() {
+		err = rows.Scan(&total_hours)
+		if err != nil {
+			return 0, err
+		}
+	}
+	return total_hours, nil
 }
 
 func (s *Invoice) Create(db *mysql.DB) (interface{}, error) {
@@ -31,7 +47,7 @@ func (s *Invoice) Create(db *mysql.DB) (interface{}, error) {
 	if err != nil {
 		return -1, err
 	}
-	res, err := stmt.Exec(payload.CompanyID, payload.DateFrom, payload.DateTo, payload.URL, payload.Comment, payload.Rate, payload.TotalHours)
+	res, err := stmt.Exec(payload.CompanyID, payload.DateFrom, payload.DateTo, payload.URL, payload.Comment, payload.Rate)
 	if err != nil {
 		return -1, err
 	}
@@ -40,20 +56,23 @@ func (s *Invoice) Create(db *mysql.DB) (interface{}, error) {
 		return -1, err
 	}
 	return &app.InvoiceMedia{
-		ID:         int(id),
-		CompanyID:  int(payload.CompanyID),
-		DateFrom:   payload.DateFrom,
-		DateTo:     payload.DateTo,
-		URL:        payload.URL,
-		Comment:    payload.Comment,
-		Rate:       payload.Rate,
-		TotalHours: payload.TotalHours,
+		ID:        int(id),
+		CompanyID: int(payload.CompanyID),
+		DateFrom:  payload.DateFrom,
+		DateTo:    payload.DateTo,
+		URL:       payload.URL,
+		Comment:   payload.Comment,
+		Rate:      payload.Rate,
 	}, nil
 }
 
 func (s *Invoice) Read(db *mysql.DB) (interface{}, error) {
 	id := s.Data.(int)
 	rows, err := db.Query(fmt.Sprintf(s.Stmt["GET_ONE"], id))
+	if err != nil {
+		return nil, err
+	}
+	total_hours, err := s.GetTotalHours(db, id)
 	if err != nil {
 		return nil, err
 	}
@@ -65,8 +84,7 @@ func (s *Invoice) Read(db *mysql.DB) (interface{}, error) {
 		var url string
 		var comment string
 		var rate float64
-		var totalHours float64
-		err = rows.Scan(&id, &company_id, &dateFrom, &dateTo, &url, &comment, &rate, &totalHours)
+		err = rows.Scan(&id, &company_id, &dateFrom, &dateTo, &url, &comment, &rate)
 		if err != nil {
 			return nil, err
 		}
@@ -77,7 +95,7 @@ func (s *Invoice) Read(db *mysql.DB) (interface{}, error) {
 		row.URL = url
 		row.Comment = comment
 		row.Rate = rate
-		row.TotalHours = totalHours
+		row.TotalHours = total_hours
 	}
 	return row, nil
 }
@@ -88,7 +106,7 @@ func (s *Invoice) Update(db *mysql.DB) error {
 	if err != nil {
 		return err
 	}
-	_, err = stmt.Exec(payload.CompanyID, payload.DateFrom, payload.DateTo, payload.URL, payload.Comment, payload.Rate, payload.TotalHours, payload.ID)
+	_, err = stmt.Exec(payload.CompanyID, payload.DateFrom, payload.DateTo, payload.URL, payload.Comment, payload.Rate, payload.ID)
 	return err
 }
 
@@ -146,12 +164,16 @@ func (s *Invoice) List(db *mysql.DB) (interface{}, error) {
 		var url string
 		var comment string
 		var rate float64
-		var totalHours float64
-		err = rows.Scan(&id, &company_id, &dateFrom, &dateTo, &url, &comment, &rate, &totalHours)
+		var total_hours float64
+		err = rows.Scan(&id, &company_id, &dateFrom, &dateTo, &url, &comment, &rate)
 		if err != nil {
 			return nil, err
 		}
 		entries, err := List(NewEntry(id))
+		if err != nil {
+			return nil, err
+		}
+		total_hours, err = s.GetTotalHours(db, id)
 		if err != nil {
 			return nil, err
 		}
@@ -163,7 +185,7 @@ func (s *Invoice) List(db *mysql.DB) (interface{}, error) {
 			URL:        url,
 			Comment:    comment,
 			Rate:       rate,
-			TotalHours: totalHours,
+			TotalHours: total_hours,
 			Entries:    entries.(app.EntryMediaCollection),
 		}
 		i++

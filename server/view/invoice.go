@@ -1,8 +1,6 @@
 package view
 
 import (
-	"strings"
-
 	"github.com/btoll/go-invoice/server/app"
 )
 
@@ -13,6 +11,8 @@ type Invoice struct {
 	Invoice     *app.InvoiceMedia
 }
 
+/*
 func (i *Invoice) ParseReferences(references string) []string {
 	return strings.Fields(references)
 }
+*/

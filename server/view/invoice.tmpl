@@ -92,9 +92,15 @@ body {
         </div>
         <div id="to" class="box">
             <h4>Bill To:</h4>
-            <p>Benjamin Toll</p>
-            <p>113 Old Colony Road</p>
-            <p>Princeton, MA 01541</p>
+	    <p>{{ .Company.Name }}</p>
+	    <p>Attn: {{ .Company.Contact }}</p>
+	    <p>{{ .Company.Street1 }}</p>
+	    {{ if .Company.Street2 }}
+		    <p>{{ .Company.Street2 }}</p>
+	    {{ else }}
+		    <p style="display: none;"></p>
+	    {{ end }}
+	    <p>{{ .Company.City }} {{ .Company.State }}, {{ .Company.Zip }}</p>
         </div>
     </div>
 
@@ -105,20 +111,20 @@ body {
         <h4>Work Description:</h4>
         <ul class="entryItems">
             {{ with .Invoice.Entries }}
-            {{ range . }}
-                <li>
-                    <div>
-                        <span>{{ .Date }}</span>
-                        <span>{{ .Hours }} hours</span>
-                    </div>
-                    <div>
-                        <p class="bold">{{ .Title }}</p>
-                        <div>
-                            <pre>{{ .Comment }}</pre>
-                        </div>
-                    </div>
-                </li>
-            {{ end }}
+		    {{ range . }}
+			<li>
+			    <div>
+				<span>{{ .Date }}</span>
+				<span>{{ .Hours }} hours</span>
+			    </div>
+			    <div>
+				<p class="bold">{{ .Title }}</p>
+				<div>
+				    <pre>{{ .Comment }}</pre>
+				</div>
+			    </div>
+			</li>
+		    {{ end }}
             {{ end }}
         </ul>
     </div>

@@ -109,19 +109,12 @@ var InvoicePayload = Type("InvoicePayload", func() {
 		Metadata("struct:tag:datastore", "rate,noindex")
 		Metadata("struct:tag:json", "rate")
 	})
-	Attribute("totalHours", Number, "Invoice total hours", func() {
-		Metadata("struct:tag:datastore", "totalHours")
-		// Note that the following statement is needed b/c the json response was returned with
-		// `TotalHours` in the payload which was not being correctly parsed into the client-side
-		// model b/c Elm was expecting it to be camel-case `totalHours`!
-		Metadata("struct:tag:json", "totalHours")
-	})
 	Attribute("entries", Any, "Invoice entries", func() {
 		Metadata("struct:tag:datastore", "entries,noindex")
 		Metadata("struct:tag:json", "entries")
 	})
 
-	Required("company_id", "dateFrom", "dateTo", "url", "comment", "rate", "totalHours")
+	Required("company_id", "dateFrom", "dateTo", "url", "comment", "rate")
 })
 
 var InvoiceMedia = MediaType("application/invoiceapi.invoiceentity", func() {
@@ -138,7 +131,7 @@ var InvoiceMedia = MediaType("application/invoiceapi.invoiceentity", func() {
 		Attribute("url")
 		Attribute("comment")
 		Attribute("rate")
-		Attribute("totalHours")
+		Attribute("totalHours", Number)
 		Attribute("entries", CollectionOf(EntryMedia))
 
 		Required("id", "company_id", "dateFrom", "dateTo", "url", "comment", "rate", "totalHours", "entries")

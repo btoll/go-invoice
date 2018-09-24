@@ -63,7 +63,6 @@ encoder invoice =
         , ( "url", Encode.string invoice.url )
         , ( "comment", Encode.string invoice.comment )
         , ( "rate", Encode.float invoice.rate )
-        , ( "totalHours", Encode.float invoice.totalHours )
         ]
 
 succeed : a -> Decoder a

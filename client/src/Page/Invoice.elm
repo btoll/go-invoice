@@ -638,11 +638,6 @@ formFields model invoice =
         , onInput ( SetFormValue ( \v -> { invoice | rate = Form.toFloat v } ) )
         ]
         []
-    , Form.float "Total Hours"
-        [ value ( toString invoice.totalHours )
-        , onInput ( SetFormValue ( \v -> { invoice | totalHours = Form.toFloat v } ) )
-        ]
-        []
     , Form.submit model.disabled Cancel
     ]
 
