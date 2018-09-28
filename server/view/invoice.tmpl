@@ -113,9 +113,14 @@ body {
             {{ with .Invoice.Entries }}
 		    {{ range . }}
 			<li>
-			    <div>
+			    <div class="entryItemHeader">
 				<span>{{ .Date }}</span>
 				<span>{{ .Hours }} hours</span>
+				<ul>
+					{{ range $_, $link := .Reference }}
+						<li><a href="{{ $link }}" style="font-size: 14px;" target="_blank">{{ $link }}<a/></li>
+					{{ end }}
+				</ul>
 			    </div>
 			    <div>
 				<p class="bold">{{ .Title }}</p>

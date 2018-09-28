@@ -10,9 +10,3 @@ type Invoice struct {
 	Company     *app.CompanyMedia
 	Invoice     *app.InvoiceMedia
 }
-
-/*
-func (i *Invoice) ParseReferences(references string) []string {
-	return strings.Fields(references)
-}
-*/
