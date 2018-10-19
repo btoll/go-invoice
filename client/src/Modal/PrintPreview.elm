@@ -122,8 +122,10 @@ view : PrintPreview -> Html Msg
 view previewData =
     div [ "printPreview" |> id ] [
         previewData |> printPreview
-        , button [ onClick Export ] [ text "Export as HTML" ]
-        , button [ onClick Close ] [ text "Close" ]
+        , div [ "printPreviewActions" |> id ] [
+            button [ onClick Export ] [ text "Export as HTML" ]
+            , button [ onClick Close ] [ text "Close" ]
         ]
+    ]
 
 

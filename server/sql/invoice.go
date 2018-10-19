@@ -35,7 +35,8 @@ func (s *Invoice) GetTotalHours(db *mysql.DB, invoice_id int) (float64, error) {
 	for rows.Next() {
 		err = rows.Scan(&total_hours)
 		if err != nil {
-			return 0, err
+			// Don't return an error here, 0 is acceptable!
+			return 0, nil
 		}
 	}
 	return total_hours, nil
