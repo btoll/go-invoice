@@ -1,5 +1,6 @@
 module Page.Entry exposing (Model, Msg, init, update, view)
 
+import Data.Company exposing (Company)
 import Data.Entry exposing (Entry, new)
 import Data.Invoice exposing (Invoice)
 import Date exposing (Date, Day(..), day, dayOfWeek, month, year)
@@ -9,6 +10,7 @@ import Html.Attributes exposing (action, autofocus, checked, class, cols, disabl
 import Html.Events exposing (onClick, onInput, onSubmit)
 import Html.Lazy exposing (lazy)
 import Http
+import Request.Company
 import Request.Entry
 import Request.Invoice
 import Table exposing (defaultCustomizations)
@@ -32,6 +34,7 @@ type alias Model =
     , editing : Maybe Entry
     , disabled : Bool
 
+    , companies : List Company
     , entries : List Entry
     , invoices : List Invoice
     , selectedInvoiceID : Int
@@ -83,6 +86,7 @@ init url =
     , editing = Nothing
     , disabled = True
 
+    , companies = []
     , entries = []
     , invoices = []
     , selectedInvoiceID = -1
@@ -94,6 +98,7 @@ init url =
         , "-1"
             |> Request.Invoice.list url
             |> Http.send FetchedInvoice
+        , Request.Company.list url |> Http.send FetchedCompany
         ]
 
 
@@ -107,6 +112,7 @@ type Msg
     | Delete Entry
     | Deleted ( Result Http.Error Entry )
     | Edit Entry
+    | FetchedCompany ( Result Http.Error ( List Company ) )
     | FetchedEntry ( Result Http.Error ( List Entry ) )
     | FetchedInvoice ( Result Http.Error ( List Invoice ) )
     | InvoiceSelected String
@@ -191,6 +197,18 @@ update url msg model =
                 action = Editing
                 , editing = Just entry
                 , date = entry.date |> Util.Date.unsafeFromString |> Just
+            } ! []
+
+        FetchedCompany ( Ok companies ) ->
+            { model |
+                companies = companies
+                , tableState = Table.initialSort "ID"
+            } ! []
+
+        FetchedCompany ( Err err ) ->
+            { model |
+                companies = []
+                , tableState = Table.initialSort "ID"
             } ! []
 
         FetchedEntry ( Ok entries ) ->
@@ -421,10 +439,18 @@ drawView model =
             Just entry ->
                 entry
 
+        getCompanyName: Int -> String
+        getCompanyName id =
+            model.companies
+                |> List.filter ( \c -> (==) c.id id )
+                |> List.head
+                |> Maybe.withDefault Data.Company.new
+                >> .name
+
         options : List Invoice -> List ( Html Msg )
         options invoices =
             invoices
-                |> List.map ( \m -> ( m.id |> toString, ( m.company_id |> toString ) ++ " | " ++ m.dateFrom ++ " <> " ++ m.dateTo ) )
+                |> List.map ( \m -> ( m.id |> toString, ( m.company_id |> getCompanyName ) ++ " | " ++ m.dateFrom ++ " <> " ++ m.dateTo ) )
                 |> (::) ( "-1", "-- Select an invoice --" )
                 |> List.map ( model.selectedInvoiceID |> toString |> Form.option )
 
