@@ -101,20 +101,24 @@ var InvoicePayload = Type("InvoicePayload", func() {
 		Metadata("struct:tag:datastore", "url,noindex")
 		Metadata("struct:tag:json", "url")
 	})
-	Attribute("comment", String, "Invoice comment", func() {
-		Metadata("struct:tag:datastore", "comment,noindex")
-		Metadata("struct:tag:json", "comment")
+	Attribute("notes", String, "Invoice notes", func() {
+		Metadata("struct:tag:datastore", "notes,noindex")
+		Metadata("struct:tag:json", "notes")
 	})
 	Attribute("rate", Number, "Invoice rate", func() {
 		Metadata("struct:tag:datastore", "rate,noindex")
 		Metadata("struct:tag:json", "rate")
+	})
+	Attribute("paid", Boolean, "Invoice paid?", func() {
+		Metadata("struct:tag:datastore", "paid,noindex")
+		Metadata("struct:tag:json", "paid")
 	})
 	Attribute("entries", Any, "Invoice entries", func() {
 		Metadata("struct:tag:datastore", "entries,noindex")
 		Metadata("struct:tag:json", "entries")
 	})
 
-	Required("company_id", "dateFrom", "dateTo", "url", "comment", "rate")
+	Required("company_id", "dateFrom", "dateTo", "url", "notes", "rate", "paid")
 })
 
 var InvoiceMedia = MediaType("application/invoiceapi.invoiceentity", func() {
@@ -129,12 +133,13 @@ var InvoiceMedia = MediaType("application/invoiceapi.invoiceentity", func() {
 		Attribute("dateFrom")
 		Attribute("dateTo")
 		Attribute("url")
-		Attribute("comment")
+		Attribute("notes")
 		Attribute("rate")
+		Attribute("paid")
 		Attribute("totalHours", Number)
 		Attribute("entries", CollectionOf(EntryMedia))
 
-		Required("id", "company_id", "dateFrom", "dateTo", "url", "comment", "rate", "totalHours", "entries")
+		Required("id", "company_id", "dateFrom", "dateTo", "url", "notes", "rate", "paid", "totalHours", "entries")
 	})
 
 	View("default", func() {
@@ -143,8 +148,9 @@ var InvoiceMedia = MediaType("application/invoiceapi.invoiceentity", func() {
 		Attribute("dateFrom")
 		Attribute("dateTo")
 		Attribute("url")
-		Attribute("comment")
+		Attribute("notes")
 		Attribute("rate")
+		Attribute("paid")
 		Attribute("totalHours")
 		Attribute("entries")
 	})

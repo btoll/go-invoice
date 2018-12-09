@@ -18,10 +18,10 @@ func NewInvoice(payload interface{}) *Invoice {
 		Stmt: map[string]string{
 			"DELETE":             "DELETE FROM invoice WHERE id=?",
 			"GET_ONE":            "SELECT * FROM invoice WHERE id=%d",
-			"INSERT":             "INSERT invoice SET company_id=?,dateFrom=?,dateTo=?,url=?,comment=?,rate=?",
+			"INSERT":             "INSERT invoice SET company_id=?,dateFrom=?,dateTo=?,url=?,notes=?,rate=?,paid=?",
 			"SELECT":             "SELECT %s FROM invoice %s ORDER BY dateFrom DESC",
 			"SELECT_TOTAL_HOURS": "SELECT SUM(entry.hours) AS totalHours FROM invoice JOIN entry ON entry.invoice_id=invoice.id WHERE invoice.id=%d",
-			"UPDATE":             "UPDATE invoice SET company_id=?,dateFrom=?,dateTo=?,url=?,comment=?,rate=? WHERE id=?",
+			"UPDATE":             "UPDATE invoice SET company_id=?,dateFrom=?,dateTo=?,url=?,notes=?,rate=?,paid=? WHERE id=?",
 		},
 	}
 }
@@ -48,7 +48,7 @@ func (s *Invoice) Create(db *mysql.DB) (interface{}, error) {
 	if err != nil {
 		return -1, err
 	}
-	res, err := stmt.Exec(payload.CompanyID, payload.DateFrom, payload.DateTo, payload.URL, payload.Comment, payload.Rate)
+	res, err := stmt.Exec(payload.CompanyID, payload.DateFrom, payload.DateTo, payload.URL, payload.Notes, payload.Rate, payload.Paid)
 	if err != nil {
 		return -1, err
 	}
@@ -62,8 +62,9 @@ func (s *Invoice) Create(db *mysql.DB) (interface{}, error) {
 		DateFrom:  payload.DateFrom,
 		DateTo:    payload.DateTo,
 		URL:       payload.URL,
-		Comment:   payload.Comment,
+		Notes:     payload.Notes,
 		Rate:      payload.Rate,
+		Paid:      payload.Paid,
 	}, nil
 }
 
@@ -83,9 +84,10 @@ func (s *Invoice) Read(db *mysql.DB) (interface{}, error) {
 		var dateFrom string
 		var dateTo string
 		var url string
-		var comment string
+		var notes string
 		var rate float64
-		err = rows.Scan(&id, &company_id, &dateFrom, &dateTo, &url, &comment, &rate)
+		var paid bool
+		err = rows.Scan(&id, &company_id, &dateFrom, &dateTo, &url, &notes, &rate, &paid)
 		if err != nil {
 			return nil, err
 		}
@@ -94,8 +96,9 @@ func (s *Invoice) Read(db *mysql.DB) (interface{}, error) {
 		row.DateFrom = dateFrom
 		row.DateTo = dateTo
 		row.URL = url
-		row.Comment = comment
+		row.Notes = notes
 		row.Rate = rate
+		row.Paid = paid
 		row.TotalHours = total_hours
 	}
 	return row, nil
@@ -107,7 +110,7 @@ func (s *Invoice) Update(db *mysql.DB) error {
 	if err != nil {
 		return err
 	}
-	_, err = stmt.Exec(payload.CompanyID, payload.DateFrom, payload.DateTo, payload.URL, payload.Comment, payload.Rate, payload.ID)
+	_, err = stmt.Exec(payload.CompanyID, payload.DateFrom, payload.DateTo, payload.URL, payload.Notes, payload.Rate, payload.Paid, payload.ID)
 	return err
 }
 
@@ -163,10 +166,11 @@ func (s *Invoice) List(db *mysql.DB) (interface{}, error) {
 		var dateFrom string
 		var dateTo string
 		var url string
-		var comment string
+		var notes string
 		var rate float64
+		var paid bool
 		var total_hours float64
-		err = rows.Scan(&id, &company_id, &dateFrom, &dateTo, &url, &comment, &rate)
+		err = rows.Scan(&id, &company_id, &dateFrom, &dateTo, &url, &notes, &rate, &paid)
 		if err != nil {
 			return nil, err
 		}
@@ -184,8 +188,9 @@ func (s *Invoice) List(db *mysql.DB) (interface{}, error) {
 			DateFrom:   dateFrom,
 			DateTo:     dateTo,
 			URL:        url,
-			Comment:    comment,
+			Notes:      notes,
 			Rate:       rate,
+			Paid:       paid,
 			TotalHours: total_hours,
 			Entries:    entries.(app.EntryMediaCollection),
 		}

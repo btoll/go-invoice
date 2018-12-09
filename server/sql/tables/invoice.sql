@@ -9,8 +9,9 @@ CREATE TABLE `invoice` (
   `dateFrom` date NOT NULL,
   `dateTo` date NOT NULL,
   `url` varchar(255),
-  `comment` text,
+  `notes` text,
   `rate` FLOAT DEFAULT 0.0,
+  `paid` TINYINT(4) DEFAULT 0,
   PRIMARY KEY (`id`),
   KEY `ID` (`id`),
   CONSTRAINT `fkcompany_id` FOREIGN KEY (`company_id`) REFERENCES `company` (`id`) ON DELETE CASCADE

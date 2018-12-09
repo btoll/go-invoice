@@ -1,7 +1,7 @@
 module Data.Invoice exposing (Invoice, decoder, encoder, manyDecoder, new, succeed)
 
 import Data.Entry exposing (Entry)
-import Json.Decode as Decode exposing (Decoder, float, int, list, string)
+import Json.Decode as Decode exposing (Decoder, bool, float, int, list, string)
 import Json.Decode.Pipeline exposing (decode, optional, required)
 import Json.Encode as Encode
 
@@ -13,8 +13,9 @@ type alias Invoice =
     , dateFrom : String
     , dateTo : String
     , url : String
-    , comment : String
+    , notes : String
     , rate : Float
+    , paid : Bool
     , totalHours : Float
     , entries : List Entry
     }
@@ -27,8 +28,9 @@ new =
     , dateFrom = ""
     , dateTo = ""
     , url = ""
-    , comment = ""
+    , notes = ""
     , rate = 0.00
+    , paid = False
     , totalHours = 0.00
     , entries = []
     }
@@ -42,8 +44,9 @@ decoder =
         |> required "dateFrom" string
         |> required "dateTo" string
         |> optional "url" string ""
-        |> optional "comment" string ""
+        |> optional "notes" string ""
         |> optional "rate" float 0.00
+        |> optional "paid" bool False
         |> optional "totalHours" float 0.00
         |> optional "entries" ( Data.Entry.decoder |> Decode.list ) []
 
@@ -61,8 +64,9 @@ encoder invoice =
         , ( "dateFrom", Encode.string invoice.dateFrom )
         , ( "dateTo", Encode.string invoice.dateTo )
         , ( "url", Encode.string invoice.url )
-        , ( "comment", Encode.string invoice.comment )
+        , ( "notes", Encode.string invoice.notes )
         , ( "rate", Encode.float invoice.rate )
+        , ( "paid", Encode.bool invoice.paid )
         ]
 
 succeed : a -> Decoder a

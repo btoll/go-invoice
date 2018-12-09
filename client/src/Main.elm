@@ -51,7 +51,7 @@ init flags location =
         url =
             if ( Maybe.withDefault "dev" flags.env ) == "production"
             then "https://www.benjamintoll.com"
-            else "http://localhost:8080"
+            else "http://localhost:8090"
     in
         setRoute ( Route.fromLocation location )
             { build = { url = url }

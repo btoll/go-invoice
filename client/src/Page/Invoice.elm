@@ -7,7 +7,7 @@ import Date exposing (Date, Day(..), day, dayOfWeek, month, year)
 import DatePicker exposing (defaultSettings, DateEvent(..))
 import Html exposing (Html, Attribute, button, div, form, h1, input, label, node, section, text)
 import Html.Attributes exposing (action, autofocus, checked, class, cols, disabled, for, rows, style, type_, value)
-import Html.Events exposing (onClick, onInput, onSubmit)
+import Html.Events exposing (onCheck, onClick, onInput, onSubmit)
 import Html.Lazy exposing (lazy)
 import Http
 import Request.Company
@@ -148,6 +148,7 @@ type Msg
     | PrintPreview Invoice
     | Put
     | Putted ( Result Http.Error Int )
+    | SetCheckboxValue ( Bool -> Invoice ) Bool
     | SetFormValue ( String -> Invoice ) String
     | SetTableState Table.State
     | Submit
@@ -517,6 +518,12 @@ update url msg model =
                 errors = (::) e model.errors
             } ! []
 
+        SetCheckboxValue setBoolValue b ->
+            { model |
+                editing = setBoolValue b |> Just
+                , disabled = False
+            } ! []
+
         SetFormValue setFormValue s ->
             { model |
                 editing = Just ( setFormValue s )
@@ -626,9 +633,9 @@ formFields model invoice =
         , onInput ( SetFormValue ( \v -> { invoice | url = v } ) )
         ]
         []
-    , Form.textarea "Comment"
-        [ value invoice.comment
-        , onInput ( SetFormValue ( \v -> { invoice | comment = v } ) )
+    , Form.textarea "Notes"
+        [ value invoice.notes
+        , onInput ( SetFormValue ( \v -> { invoice | notes = v } ) )
         , 80 |> cols
         , 20 |> rows
         ]
@@ -636,6 +643,11 @@ formFields model invoice =
     , Form.float "Rate"
         [ value ( toString invoice.rate )
         , onInput ( SetFormValue ( \v -> { invoice | rate = Form.toFloat v } ) )
+        ]
+        []
+    , Form.checkbox "Paid"
+        [ checked invoice.paid
+        , onCheck ( SetCheckboxValue ( \v -> { invoice | paid = v } ) )
         ]
         []
     , Form.submit model.disabled Cancel
@@ -656,9 +668,10 @@ config =
         [ Table.stringColumn "Date From" .dateFrom
         , Table.stringColumn "Date To" .dateTo
         , Table.stringColumn "URL" .url
-        , Table.stringColumn "Comment" .comment
+        , Table.stringColumn "Notes" .notes
         , Table.floatColumn "Rate" .rate
         , Table.floatColumn "Total Hours" .totalHours
+        , customColumn "Paid" viewCheckbox
         , customColumn "" ( viewButton Edit "Edit" )
         , customColumn "" ( viewButton Delete "Delete" )
         , customColumn "" ( viewButton PrintPreview "Print Preview" )
@@ -689,5 +702,12 @@ viewButton msg name invoice =
     Table.HtmlDetails []
         [ button [ onClick <| msg <| invoice ] [ text name ]
         ]
+
+
+viewCheckbox : Invoice -> Table.HtmlDetails Msg
+viewCheckbox { paid } =
+  Table.HtmlDetails []
+    [ input [ checked paid, Html.Attributes.disabled True, type_ "checkbox" ] []
+    ]
 
 
