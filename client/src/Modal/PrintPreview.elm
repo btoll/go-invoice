@@ -120,12 +120,17 @@ update msg =
 
 view : PrintPreview -> Html Msg
 view previewData =
+    let
+        actions =
+            div [ "printPreviewActions" |> id ] [
+                button [ onClick Export ] [ text "Export as HTML" ]
+                , button [ onClick Close ] [ text "Close" ]
+            ]
+    in
     div [ "printPreview" |> id ] [
-        previewData |> printPreview
-        , div [ "printPreviewActions" |> id ] [
-            button [ onClick Export ] [ text "Export as HTML" ]
-            , button [ onClick Close ] [ text "Close" ]
-        ]
+        actions
+        , previewData |> printPreview
+        , actions
     ]
 
 
