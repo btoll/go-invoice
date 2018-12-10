@@ -48,6 +48,10 @@ nav div.container div p {
 section {
     margin-left: 2%;
 }
+section table td div.notes {
+    height: 50px;
+    overflow: auto;
+}
 div p.error {
     background-color: #ff9;
     border: 1px solid #000;

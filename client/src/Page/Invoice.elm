@@ -5,7 +5,7 @@ import Data.Invoice exposing (Invoice, new)
 import Data.PrintPreview
 import Date exposing (Date, Day(..), day, dayOfWeek, month, year)
 import DatePicker exposing (defaultSettings, DateEvent(..))
-import Html exposing (Html, Attribute, button, div, form, h1, input, label, node, section, text)
+import Html exposing (Html, Attribute, button, div, form, h1, input, label, node, section, span, text)
 import Html.Attributes exposing (action, autofocus, checked, class, cols, disabled, for, rows, style, type_, value)
 import Html.Events exposing (onCheck, onClick, onInput, onSubmit)
 import Html.Lazy exposing (lazy)
@@ -668,7 +668,7 @@ config =
         [ Table.stringColumn "Date From" .dateFrom
         , Table.stringColumn "Date To" .dateTo
         , Table.stringColumn "URL" .url
-        , Table.stringColumn "Notes" .notes
+        , customColumn "Notes" viewNotes
         , Table.floatColumn "Rate" .rate
         , Table.floatColumn "Total Hours" .totalHours
         , customColumn "Paid" viewCheckbox
@@ -708,6 +708,13 @@ viewCheckbox : Invoice -> Table.HtmlDetails Msg
 viewCheckbox { paid } =
   Table.HtmlDetails []
     [ input [ checked paid, Html.Attributes.disabled True, type_ "checkbox" ] []
+    ]
+
+
+viewNotes : Invoice -> Table.HtmlDetails Msg
+viewNotes { notes } =
+  Table.HtmlDetails [ [ ( "width", "30%" ) ] |> style ]
+    [ div [ "notes" |> class ] [ notes |> text ]
     ]
 
 
