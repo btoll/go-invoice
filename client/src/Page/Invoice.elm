@@ -671,6 +671,7 @@ config =
         , customColumn "Notes" viewNotes
         , Table.floatColumn "Rate" .rate
         , Table.floatColumn "Total Hours" .totalHours
+        , customColumn "Amount" viewAmount
         , customColumn "Paid" viewCheckbox
         , customColumn "" ( viewButton Edit "Edit" )
         , customColumn "" ( viewButton Delete "Delete" )
@@ -697,10 +698,17 @@ customColumn name viewElement =
         }
 
 
+viewAmount : Invoice -> Table.HtmlDetails msg
+viewAmount { rate, totalHours } =
+    Table.HtmlDetails []
+        [ span [] [ ( (*) rate totalHours ) |> toString |> text ]
+        ]
+
+
 viewButton : ( Invoice -> msg ) -> String -> Invoice -> Table.HtmlDetails msg
 viewButton msg name invoice =
     Table.HtmlDetails []
-        [ button [ onClick <| msg <| invoice ] [ text name ]
+        [ button [ onClick <| msg <| invoice ] [ name |> text ]
         ]
 
 

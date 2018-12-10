@@ -51,6 +51,7 @@ section {
 section table td div.notes {
     height: 50px;
     overflow: auto;
+    text-align: left;
 }
 div p.error {
     background-color: #ff9;
@@ -75,6 +76,7 @@ tr {
     border-bottom: 1px solid #000;
 }
 td {
+    text-align: center;
     padding: 10px;
 }
 form {
