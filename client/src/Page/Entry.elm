@@ -537,7 +537,7 @@ config =
     , columns =
         [ Table.stringColumn "Title" .title
         , Table.stringColumn "Date" .date
-        , Table.stringColumn "Reference" ( .reference >> List.foldl (++) "" )
+        , customColumn "Reference" viewReferences
         , customColumn "Notes" viewNotes
         , Table.floatColumn "Hours" .hours
         , customColumn "" ( viewButton Edit "Edit" )
@@ -570,10 +570,26 @@ viewButton msg name sport =
         ]
 
 
+-- TODO: DRY!!
 viewNotes : Entry -> Table.HtmlDetails Msg
 viewNotes { notes } =
-  Table.HtmlDetails [ [ ( "width", "30%" ) ] |> style ]
-    [ div [ "notes" |> class ] [ notes |> text ]
-    ]
+    Table.HtmlDetails [ [ ( "width", "30%" ) ] |> style ]
+        [ div [ "notes" |> class ] [ notes |> text ]
+        ]
+
+viewReferences : Entry -> Table.HtmlDetails Msg
+viewReferences { reference } =
+    let
+        -- If we dont' separate the URLs by a space, it will be one long word that will
+        -- blow out the table.
+        separateBySpace v acc =
+            (++) acc
+                ( (++) v " "
+                )
+    in
+    Table.HtmlDetails [ [ ( "width", "30%" ) ] |> style ]
+        [ div [ "notes" |> class ] [ ( reference |> List.foldl separateBySpace "" ) |> text ]
+        ]
+-------------
 
 
