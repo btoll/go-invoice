@@ -508,9 +508,9 @@ formFields model entry =
 --        , 5 |> rows
         ]
         []
-    , Form.textarea "Comment"
-        [ value entry.comment
-        , onInput ( SetFormValue ( \v -> { entry | comment = v } ) )
+    , Form.textarea "Notes"
+        [ value entry.notes
+        , onInput ( SetFormValue ( \v -> { entry | notes = v } ) )
         , 80 |> cols
         , 20 |> rows
         ]
@@ -538,7 +538,7 @@ config =
         [ Table.stringColumn "Title" .title
         , Table.stringColumn "Date" .date
         , Table.stringColumn "Reference" ( .reference >> List.foldl (++) "" )
-        , Table.stringColumn "Comment" .comment
+        , customColumn "Notes" viewNotes
         , Table.floatColumn "Hours" .hours
         , customColumn "" ( viewButton Edit "Edit" )
         , customColumn "" ( viewButton Delete "Delete" )
@@ -568,5 +568,12 @@ viewButton msg name sport =
     Table.HtmlDetails []
         [ button [ onClick <| msg <| sport ] [ text name ]
         ]
+
+
+viewNotes : Entry -> Table.HtmlDetails Msg
+viewNotes { notes } =
+  Table.HtmlDetails [ [ ( "width", "30%" ) ] |> style ]
+    [ div [ "notes" |> class ] [ notes |> text ]
+    ]
 
 

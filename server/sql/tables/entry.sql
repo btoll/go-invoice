@@ -8,7 +8,7 @@ CREATE TABLE `entry` (
   `title` varchar(255) NOT NULL,
   `date` date NOT NULL,
   `reference` text(1000),
-  `comment` text,
+  `notes` text,
   `hours` FLOAT NOT NULL DEFAULT 0.0,
   PRIMARY KEY (`id`),
   KEY `ID` (`id`),

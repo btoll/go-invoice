@@ -12,7 +12,7 @@ type alias Entry =
     , title : String
     , date : String
     , reference : List String
-    , comment : String
+    , notes : String
     , hours : Float
     }
 
@@ -24,7 +24,7 @@ new =
     , title = ""
     , date = ""
     , reference = []
-    , comment = ""
+    , notes = ""
     , hours = 0.00
     }
 
@@ -37,7 +37,7 @@ decoder =
         |> optional "title" string ""
         |> required "date" string
         |> optional "reference" ( string |> Decode.list ) []
-        |> optional "comment" string ""
+        |> optional "notes" string ""
         |> optional "hours" float 0.00
 
 
@@ -54,7 +54,7 @@ encoder entry =
         , ( "title", entry.title |> Encode.string )
         , ( "date", entry.date |> Encode.string )
         , ( "reference", entry.reference |> manyReferencesEncoder >> Encode.list )
-        , ( "comment", entry.comment |> Encode.string )
+        , ( "notes", entry.notes |> Encode.string )
         , ( "hours", entry.hours |> Encode.float )
         ]
 

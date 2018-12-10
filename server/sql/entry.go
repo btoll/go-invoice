@@ -18,9 +18,9 @@ func NewEntry(payload interface{}) *Entry {
 		Data: payload,
 		Stmt: map[string]string{
 			"DELETE": "DELETE FROM entry WHERE id=?",
-			"INSERT": "INSERT entry SET invoice_id=?,date=?,title=?,reference=?,comment=?,hours=?",
+			"INSERT": "INSERT entry SET invoice_id=?,date=?,title=?,reference=?,notes=?,hours=?",
 			"SELECT": "SELECT %s FROM entry WHERE invoice_id=%d ORDER BY date ASC",
-			"UPDATE": "UPDATE entry SET invoice_id=?,date=?,title=?,reference=?,comment=?,hours=? WHERE id=?",
+			"UPDATE": "UPDATE entry SET invoice_id=?,date=?,title=?,reference=?,notes=?,hours=? WHERE id=?",
 		},
 	}
 }
@@ -31,7 +31,7 @@ func (s *Entry) Create(db *mysql.DB) (interface{}, error) {
 	if err != nil {
 		return -1, err
 	}
-	res, err := stmt.Exec(payload.InvoiceID, payload.Date, payload.Title, strings.Join(payload.Reference, ""), payload.Comment, payload.Hours)
+	res, err := stmt.Exec(payload.InvoiceID, payload.Date, payload.Title, strings.Join(payload.Reference, ""), payload.Notes, payload.Hours)
 	if err != nil {
 		return -1, err
 	}
@@ -45,7 +45,7 @@ func (s *Entry) Create(db *mysql.DB) (interface{}, error) {
 		Date:      payload.Date,
 		Title:     payload.Title,
 		Reference: payload.Reference,
-		Comment:   payload.Comment,
+		Notes:     payload.Notes,
 		Hours:     payload.Hours,
 	}, nil
 }
@@ -60,7 +60,7 @@ func (s *Entry) Update(db *mysql.DB) error {
 	if err != nil {
 		return err
 	}
-	_, err = stmt.Exec(payload.InvoiceID, payload.Date, payload.Title, strings.Join(payload.Reference, ""), payload.Comment, payload.Hours, payload.ID)
+	_, err = stmt.Exec(payload.InvoiceID, payload.Date, payload.Title, strings.Join(payload.Reference, ""), payload.Notes, payload.Hours, payload.ID)
 	return err
 }
 
@@ -99,9 +99,9 @@ func (s *Entry) List(db *mysql.DB) (interface{}, error) {
 		var title string
 		var date string
 		var reference string
-		var comment string
+		var notes string
 		var hours float64
-		err = rows.Scan(&id, &invoice_id, &title, &date, &reference, &comment, &hours)
+		err = rows.Scan(&id, &invoice_id, &title, &date, &reference, &notes, &hours)
 		if err != nil {
 			return nil, err
 		}
@@ -111,7 +111,7 @@ func (s *Entry) List(db *mysql.DB) (interface{}, error) {
 			Title:     title,
 			Date:      date,
 			Reference: strings.Fields(reference),
-			Comment:   comment,
+			Notes:     notes,
 			Hours:     hours,
 		}
 		i++

@@ -43,7 +43,7 @@ entryItem entry =
         , div [] [
             p [ "bold" |> class ] [ entry.title |> text ]
             , div [] [
-                pre [] [ entry.comment |> text ]
+                pre [] [ entry.notes |> text ]
             ]
         ]
     ]
