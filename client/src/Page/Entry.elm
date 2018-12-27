@@ -3,9 +3,10 @@ module Page.Entry exposing (Model, Msg, init, update, view)
 import Data.Company exposing (Company)
 import Data.Entry exposing (Entry, new)
 import Data.Invoice exposing (Invoice)
+import Data.PrintPreview
 import Date exposing (Date, Day(..), day, dayOfWeek, month, year)
 import DatePicker exposing (defaultSettings, DateEvent(..))
-import Html exposing (Html, Attribute, button, div, form, h1, input, label, node, section, text)
+import Html exposing (Html, Attribute, button, div, form, h1, input, label, node, section, span, text)
 import Html.Attributes exposing (action, autofocus, checked, class, cols, disabled, for, rows, style, type_, value)
 import Html.Events exposing (onClick, onInput, onSubmit)
 import Html.Lazy exposing (lazy)
@@ -112,6 +113,8 @@ type Msg
     | Delete Entry
     | Deleted ( Result Http.Error Entry )
     | Edit Entry
+    | Export Invoice
+    | Exported ( Result Http.Error Invoice )
     | FetchedCompany ( Result Http.Error ( List Company ) )
     | FetchedEntry ( Result Http.Error ( List Entry ) )
     | FetchedInvoice ( Result Http.Error ( List Invoice ) )
@@ -119,6 +122,7 @@ type Msg
     | ModalMsg Modal.Msg
     | Post
     | Posted ( Result Http.Error Entry )
+    | PrintPreview Invoice
     | Put
     | Putted ( Result Http.Error Int )
     | SetFormValue ( String -> Entry ) String
@@ -199,6 +203,21 @@ update url msg model =
                 , date = entry.date |> Util.Date.unsafeFromString |> Just
             } ! []
 
+        Export invoice ->
+            model !
+            [
+                invoice.id |> toString
+                    |> Request.Invoice.export url
+                        |> Http.toTask
+                        |> Task.attempt Exported
+            ]
+
+        Exported ( Ok invoices ) ->
+            model ! []
+
+        Exported ( Err err ) ->
+            model ! []
+
         FetchedCompany ( Ok companies ) ->
             { model |
                 companies = companies
@@ -250,18 +269,46 @@ update url msg model =
 
         ModalMsg subMsg ->
             let
-                ( showModal, editing, cmd ) =
-                    case subMsg |> Modal.update of
-                        False ->
-                            ( False, Nothing, Cmd.none )
+                pattern =
+                    model.showModal
+                        |> Tuple.second
+                        |> Maybe.withDefault ( Modal.Delete Nothing )
 
-                        True ->
+                ( showModal, cmd ) =
+                    case ( subMsg |> Modal.update, pattern ) of
+                        -- Delete
+                        ( False, Modal.Delete Nothing ) ->
+                            ( False
+                            , Cmd.none
+                            )
+
+                        ( True, Modal.Delete Nothing ) ->
                             ( True
-                            , Nothing
                             , Maybe.withDefault new model.editing
                                 |> Request.Entry.delete url
                                 |> Http.toTask
                                 |> Task.attempt Deleted
+                            )
+
+                        -- PrintPreview, Close
+                        ( False, Modal.PrintPreview ( Just invoice ) ) ->
+                            ( False
+                            , Cmd.none
+                            )
+
+                        -- PrintPreview, Print
+                        ( True, Modal.PrintPreview ( Just invoice ) ) ->
+                            ( False
+                            , model.selectedInvoiceID
+                                |> toString
+                                |> Request.Invoice.export url
+                                    |> Http.toTask
+                                    |> Task.attempt Exported
+                            )
+
+                        ( _, _ ) ->
+                            ( False
+                            , Cmd.none
                             )
             in
             { model |
@@ -325,6 +372,25 @@ update url msg model =
             in
             { model |
                 errors = (::) e model.errors
+            } ! []
+
+        PrintPreview invoice ->
+            let
+                getCompany companies =
+                    companies
+                        |> List.filter ( \company -> invoice.company_id |> (==) company.id )
+                        |> List.head
+                        |> Maybe.withDefault Data.Company.new
+            in
+            { model |
+                showModal =
+                    ( True
+                    , invoice |>
+                        Data.PrintPreview.PrintPreview ( model.companies |> getCompany )
+                        |> Just
+                        |> Modal.PrintPreview
+                        |> Just
+                    )
             } ! []
 
         Put ->
@@ -479,8 +545,16 @@ drawView model =
             ]
 
         Selected ->
+            let
+                invoice =
+                    model.invoices
+                        |> List.filter ( \invoice -> (==) invoice.id model.selectedInvoiceID )
+                        |> List.head
+                        |> Maybe.withDefault Data.Invoice.new
+            in
             [ selectInvoice
-            , button [ onClick Add ] [ text "Add Entry" ]
+            , button [ Add |> onClick ] [ "Add Entry" |> text ]
+            , button [ style [ ( "marginLeft", "10px" ) ], invoice |> PrintPreview |> onClick ] [ "Print Preview" |> text ]
             , Table.view config model.tableState model.entries
             , model.showModal
                 |> Modal.view Nothing
@@ -561,6 +635,13 @@ customColumn name viewElement =
         , viewData = viewElement
         , sorter = Table.unsortable
         }
+
+
+--viewAmount : Entry -> Table.HtmlDetails msg
+--viewAmount { rate, hours } =
+--    Table.HtmlDetails []
+--        [ span [] [ ( (*) rate hours ) |> toString |> text ]
+--        ]
 
 
 viewButton : ( Entry -> msg ) -> String -> Entry -> Table.HtmlDetails msg

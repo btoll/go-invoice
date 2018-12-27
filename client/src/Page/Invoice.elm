@@ -330,12 +330,11 @@ update url msg model =
                         |> Tuple.second
                         |> Maybe.withDefault ( Modal.Delete Nothing )
 
-                ( showModal, editing, cmd ) =
+                ( showModal, cmd ) =
                     case ( subMsg |> Modal.update, pattern ) of
                         -- Delete
                         ( True, Modal.Delete Nothing ) ->
                             ( False
-                            , Nothing
                             , Maybe.withDefault new model.editing
                                 |> Request.Invoice.delete url
                                 |> Http.toTask
@@ -345,14 +344,12 @@ update url msg model =
                         -- PrintPreview, Close
                         ( False, Modal.PrintPreview ( Just invoice ) ) ->
                             ( False
-                            , Nothing
                             , Cmd.none
                             )
 
                         -- PrintPreview, Print
                         ( True, Modal.PrintPreview ( Just invoice ) ) ->
                             ( False
-                            , Nothing
                             , Maybe.withDefault new model.editing
                                 |> .id |> toString
                                 |> Request.Invoice.export url
@@ -362,7 +359,6 @@ update url msg model =
 
                         ( _, _ ) ->
                             ( False
-                            , Nothing
                             , Cmd.none
                             )
             in
