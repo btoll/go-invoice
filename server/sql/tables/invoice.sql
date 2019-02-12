@@ -5,7 +5,6 @@ DROP TABLE IF EXISTS `invoice`;
 CREATE TABLE `invoice` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `company_id` int(11) NOT NULL,
-  `title` varchar(255),
   `dateFrom` date NOT NULL,
   `dateTo` date NOT NULL,
   `url` varchar(255),

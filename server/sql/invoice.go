@@ -169,7 +169,6 @@ func (s *Invoice) List(db *mysql.DB) (interface{}, error) {
 		var notes string
 		var rate float64
 		var paid bool
-		var total_hours float64
 		err = rows.Scan(&id, &company_id, &dateFrom, &dateTo, &url, &notes, &rate, &paid)
 		if err != nil {
 			return nil, err
@@ -178,7 +177,7 @@ func (s *Invoice) List(db *mysql.DB) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		total_hours, err = s.GetTotalHours(db, id)
+        total_hours, err := s.GetTotalHours(db, id)
 		if err != nil {
 			return nil, err
 		}
