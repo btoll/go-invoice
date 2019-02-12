@@ -12,7 +12,7 @@ CREATE TABLE `company` (
   `state` varchar(2) NOT NULL,
   `zip` varchar(30) NOT NULL,
   `url` varchar(255),
-  `comment` text,
+  `notes` text,
   PRIMARY KEY (`id`),
   KEY `ID` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;

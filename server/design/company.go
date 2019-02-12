@@ -101,16 +101,16 @@ var CompanyPayload = Type("CompanyPayload", func() {
 		Metadata("struct:tag:datastore", "url,noindex")
 		Metadata("struct:tag:json", "url")
 	})
-	Attribute("comment", String, "Company comment", func() {
-		Metadata("struct:tag:datastore", "comment,noindex")
-		Metadata("struct:tag:json", "comment")
+	Attribute("notes", String, "Company notes", func() {
+		Metadata("struct:tag:datastore", "notes,noindex")
+		Metadata("struct:tag:json", "notes")
 	})
 	Attribute("invoices", Any, "Company invoices", func() {
 		Metadata("struct:tag:datastore", "invoices,noindex")
 		Metadata("struct:tag:json", "invoices")
 	})
 
-	Required("name", "contact", "street1", "street2", "city", "state", "zip", "url", "comment")
+	Required("name", "contact", "street1", "street2", "city", "state", "zip", "url", "notes")
 })
 
 var CompanyMedia = MediaType("application/companyapi.companyentity", func() {
@@ -129,10 +129,10 @@ var CompanyMedia = MediaType("application/companyapi.companyentity", func() {
 		Attribute("state")
 		Attribute("zip")
 		Attribute("url")
-		Attribute("comment")
+		Attribute("notes")
 		Attribute("invoices", CollectionOf(InvoiceMedia))
 
-		Required("id", "name", "contact", "street1", "street2", "city", "state", "zip", "url", "comment", "invoices")
+		Required("id", "name", "contact", "street1", "street2", "city", "state", "zip", "url", "notes", "invoices")
 	})
 
 	View("default", func() {
@@ -145,7 +145,7 @@ var CompanyMedia = MediaType("application/companyapi.companyentity", func() {
 		Attribute("state")
 		Attribute("zip")
 		Attribute("url")
-		Attribute("comment")
+		Attribute("notes")
 		Attribute("invoices")
 	})
 

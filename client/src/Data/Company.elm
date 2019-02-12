@@ -17,7 +17,7 @@ type alias Company =
     , state : String
     , zip : String
     , url : String
-    , comment : String
+    , notes : String
     , invoices : List Invoice
     }
 
@@ -33,7 +33,7 @@ new =
     , state = ""
     , zip = ""
     , url = ""
-    , comment = ""
+    , notes = ""
     , invoices = []
     }
 
@@ -50,7 +50,7 @@ decoder =
         |> required "state" string
         |> required "zip" string
         |> required "url" string
-        |> required "comment" string
+        |> required "notes" string
         |> optional "invoices" ( Data.Invoice.decoder |> Decode.list ) []
 
 
@@ -71,7 +71,7 @@ encoder company =
         , ( "state", Encode.string company.state )
         , ( "zip", Encode.string company.zip )
         , ( "url", Encode.string company.url )
-        , ( "comment", Encode.string company.comment )
+        , ( "notes", Encode.string company.notes )
         ]
 
 succeed : a -> Decoder a

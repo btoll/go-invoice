@@ -18,9 +18,9 @@ func NewCompany(payload interface{}) *Company {
 		Stmt: map[string]string{
 			"DELETE":  "DELETE FROM company WHERE id=?",
 			"GET_ONE": "SELECT * FROM company WHERE id=%d",
-			"INSERT":  "INSERT company SET name=?,contact=?,street1=?,street2=?,city=?,state=?,zip=?,url=?,comment=?",
+			"INSERT":  "INSERT company SET name=?,contact=?,street1=?,street2=?,city=?,state=?,zip=?,url=?,notes=?",
 			"SELECT":  "SELECT %s FROM company",
-			"UPDATE":  "UPDATE company SET name=?,contact=?,street1=?,street2=?,city=?,state=?,zip=?,url=?,comment=? WHERE id=?",
+			"UPDATE":  "UPDATE company SET name=?,contact=?,street1=?,street2=?,city=?,state=?,zip=?,url=?,notes=? WHERE id=?",
 		},
 	}
 }
@@ -31,7 +31,7 @@ func (s *Company) Create(db *mysql.DB) (interface{}, error) {
 	if err != nil {
 		return -1, err
 	}
-	res, err := stmt.Exec(payload.Name, payload.Contact, payload.Street1, payload.Street2, payload.City, payload.State, payload.Zip, payload.URL, payload.Comment)
+	res, err := stmt.Exec(payload.Name, payload.Contact, payload.Street1, payload.Street2, payload.City, payload.State, payload.Zip, payload.URL, payload.Notes)
 	if err != nil {
 		return -1, err
 	}
@@ -49,7 +49,7 @@ func (s *Company) Create(db *mysql.DB) (interface{}, error) {
 		State:   payload.State,
 		Zip:     payload.Zip,
 		URL:     payload.URL,
-		Comment: payload.Comment,
+		Notes:   payload.Notes,
 	}, nil
 }
 
@@ -69,8 +69,8 @@ func (s *Company) Read(db *mysql.DB) (interface{}, error) {
 		var state string
 		var zip string
 		var url string
-		var comment string
-		err = rows.Scan(&id, &name, &contact, &street1, &street2, &city, &state, &zip, &url, &comment)
+		var notes string
+		err = rows.Scan(&id, &name, &contact, &street1, &street2, &city, &state, &zip, &url, &notes)
 		if err != nil {
 			return nil, err
 		}
@@ -83,7 +83,7 @@ func (s *Company) Read(db *mysql.DB) (interface{}, error) {
 		row.State = state
 		row.Zip = zip
 		row.URL = url
-		row.Comment = comment
+		row.Notes = notes
 	}
 	return row, nil
 }
@@ -94,7 +94,7 @@ func (s *Company) Update(db *mysql.DB) error {
 	if err != nil {
 		return err
 	}
-	_, err = stmt.Exec(payload.Name, payload.Contact, payload.Street1, payload.Street2, payload.City, payload.State, payload.Zip, payload.URL, payload.Comment, payload.ID)
+	_, err = stmt.Exec(payload.Name, payload.Contact, payload.Street1, payload.Street2, payload.City, payload.State, payload.Zip, payload.URL, payload.Notes, payload.ID)
 	return err
 }
 
@@ -137,8 +137,8 @@ func (s *Company) List(db *mysql.DB) (interface{}, error) {
 		var state string
 		var zip string
 		var url string
-		var comment string
-		err = rows.Scan(&id, &name, &contact, &street1, &street2, &city, &state, &zip, &url, &comment)
+		var notes string
+		err = rows.Scan(&id, &name, &contact, &street1, &street2, &city, &state, &zip, &url, &notes)
 		if err != nil {
 			return nil, err
 		}
@@ -156,7 +156,7 @@ func (s *Company) List(db *mysql.DB) (interface{}, error) {
 			State:    state,
 			Zip:      zip,
 			URL:      url,
-			Comment:  comment,
+			Notes:  notes,
 			Invoices: invoices.(app.InvoiceMediaCollection),
 		}
 		i++

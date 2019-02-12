@@ -422,9 +422,9 @@ formFields model company =
         , onInput ( SetFormValue ( \v -> { company | url = v } ) )
         ]
         []
-    , Form.textarea "Comment"
-        [ value company.comment
-        , onInput ( SetFormValue ( \v -> { company | comment = v } ) )
+    , Form.textarea "Notes"
+        [ value company.notes
+        , onInput ( SetFormValue ( \v -> { company | notes = v } ) )
         ]
         []
     , Form.submit model.disabled Cancel
@@ -450,7 +450,7 @@ config =
         , Table.stringColumn "State" .state
         , Table.stringColumn "Zip" .zip
         , Table.stringColumn "URL" .url
-        , Table.stringColumn "Comment" .comment
+        , Table.stringColumn "Notes" .notes
         , customColumn "" ( viewButton Edit "Edit" )
         , customColumn "" ( viewButton Delete "Delete" )
 --        , customColumn "" ( viewButton PrintPreview "Print Preview" )
